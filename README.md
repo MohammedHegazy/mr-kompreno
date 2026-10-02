@@ -25,6 +25,18 @@ npm run preview
 
 To generate a static site, run `npm run generate`.
 
+## Deploy
+
+`netlify.toml` pins the static build for Netlify:
+
+- Build command: `npm run generate`
+- Publish directory: `.output/public`
+- Node version: 22 (also pinned by `.nvmrc` and `engines`)
+
+Nuxt 4 requires Node `^20.19.0 || >=22.12.0`; an older Node on the build image makes `nuxt build` exit with code 2.
+
+Settings chosen in the Netlify UI override `netlify.toml`, so set the build command and publish directory in the site settings if they differ.
+
 ## Project structure
 
 - `app/pages/index.vue` composes the menu page.
