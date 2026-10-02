@@ -7,6 +7,10 @@ const activeCategory = ref('all')
 
 const currentText = computed(() => textContent[locale.value])
 
+const heroTopics = menuCategories.filter((category) => category.id !== 'all')
+
+const heroSpotlight = products.find((product) => product.id === 'p05')!
+
 const filteredProducts = computed(() => {
   if (activeCategory.value === 'all') return products
   return products.filter((product) => product.categoryId === activeCategory.value)
@@ -33,7 +37,7 @@ useSeoMeta({
       />
 
       <main>
-        <BrandHero :text="currentText" />
+        <BrandHero :text="currentText" :locale="locale" :topics="heroTopics" :spotlight="heroSpotlight" />
         <FeaturedProducts :items="featuredProducts" :text="currentText" :locale="locale" />
         <BrandIntro :text="currentText" />
 
