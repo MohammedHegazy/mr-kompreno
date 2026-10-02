@@ -7,21 +7,41 @@ const props = defineProps<{ items: MenuProduct[]; text: Record<string, any>; loc
 <template>
   <section class="section featured-products">
     <div class="container">
-      <div class="section-head">
-        <small>{{ props.text.menu.eyebrow }}</small>
-        <h2>{{ props.text.menu.title }}</h2>
-      </div>
+      <SectionHead :eyebrow="props.text.menu.eyebrow" :title="props.text.menu.title" index="01" />
 
       <div class="featured-grid">
-        <article v-for="item in props.items" :key="item.id" class="card">
-          <div class="card-media">
+        <article
+          v-for="(item, position) in props.items"
+          :key="item.id"
+          class="card"
+          v-reveal="{
+            from: position % 2 === 0 ? 'start' : 'end',
+            distance: 76,
+            duration: 1150,
+            stagger: 130,
+          }"
+        >
+          <div
+            class="card-media"
+            v-reveal="{ from: 'curtain', duration: 1100, delay: 180, ease: 'mask' }"
+          >
             <img :src="item.image" :alt="item.name[props.locale]" decoding="async" />
           </div>
+
           <div class="card-body">
-            <h3>{{ item.name[props.locale] }}</h3>
-            <p>{{ item.description[props.locale] }}</p>
+            <h3 v-reveal="{ from: 'up', distance: 16, duration: 800, delay: 160 }">
+              {{ item.name[props.locale] }}
+            </h3>
+
+            <p v-reveal="{ from: 'up', distance: 16, duration: 800, delay: 230 }">
+              {{ item.description[props.locale] }}
+            </p>
+
             <div class="card-meta">
-              <span class="price-tag">{{ props.text.menu.priceLabel }} {{ item.price }}</span>
+              <span
+                class="price-tag"
+                v-reveal="{ from: 'scale', distance: 14, duration: 900, delay: 320, ease: 'snap' }"
+              >{{ props.text.menu.priceLabel }} {{ item.price }}</span>
             </div>
           </div>
         </article>

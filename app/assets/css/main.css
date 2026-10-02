@@ -745,57 +745,6 @@ button {
   color: var(--kompreno-yellow);
 }
 
-@keyframes kompreno-hero-rise {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.hero-brand,
-.hero-copy h1,
-.hero-copy p,
-.hero-actions,
-.hero-topics,
-.hero-frame,
-.hero-tag,
-.hero-glass {
-  animation: kompreno-hero-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.hero-copy h1 {
-  animation-delay: 0.06s;
-}
-
-.hero-copy p {
-  animation-delay: 0.12s;
-}
-
-.hero-actions {
-  animation-delay: 0.18s;
-}
-
-.hero-frame {
-  animation-delay: 0.1s;
-}
-
-.hero-topics {
-  animation-delay: 0.24s;
-}
-
-.hero-tag {
-  animation-delay: 0.34s;
-}
-
-.hero-glass {
-  animation-delay: 0.42s;
-}
-
 .section {
   padding: 52px 0;
 }
@@ -2180,19 +2129,404 @@ html.loader-reveal .page-shell {
     transition-duration: 0.01ms;
   }
 
-  .hero-brand,
-  .hero-copy h1,
-  .hero-copy p,
-  .hero-actions,
-  .hero-topics,
-  .hero-frame,
-  .hero-tag,
-  .hero-glass {
-    animation: none;
-  }
-
   .product-swap-enter-active,
   .product-swap-leave-active {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* ==============================================================
+   Scroll reveal system
+   Every section and its content stays out of frame until the reader
+   reaches it, then assembles. Nothing is ever hidden until the
+   runtime has announced itself (html.reveal-ready), so a crawler, a
+   failed script or a disabled motion preference always lands on the
+   finished layout.
+
+   Choreography runs on individual transform properties (translate /
+   scale) and clip-path. Those compose with the `transform` values the
+   hover states already use instead of overwriting them, so reveals
+   never break an interaction and never trigger layout.
+   ============================================================== */
+
+:root {
+  --reveal-ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --reveal-ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+  --reveal-ease-mask: cubic-bezier(0.68, 0, 0.16, 1);
+  --reveal-ease-snap: cubic-bezier(0.32, 1.42, 0.46, 1);
+  --reveal-y: 32px;
+  --reveal-x: 44px;
+  --reveal-blur: 10px;
+  --reveal-scale: 0.94;
+  --reveal-x-sign: 1;
+}
+
+/* Horizontal travel always starts from the reading edge. */
+[dir='rtl'] {
+  --reveal-x-sign: -1;
+}
+
+html.reveal-ready .reveal {
+  --reveal-t: var(--reveal-duration, 900ms) var(--reveal-ease, var(--reveal-ease-expo)) var(--reveal-delay, 0ms);
+  transition:
+    opacity var(--reveal-t),
+    translate var(--reveal-t),
+    scale var(--reveal-t),
+    filter var(--reveal-t),
+    clip-path var(--reveal-t);
+}
+
+html.reveal-ready .reveal:not(.is-inview) {
+  opacity: 0;
+  will-change: opacity, translate, scale, clip-path;
+}
+
+html.reveal-ready .reveal[data-reveal='up']:not(.is-inview) {
+  translate: 0 var(--reveal-y, 32px);
+}
+
+html.reveal-ready .reveal[data-reveal='down']:not(.is-inview) {
+  translate: 0 calc(var(--reveal-y, 32px) * -1);
+}
+
+html.reveal-ready .reveal[data-reveal='start']:not(.is-inview) {
+  translate: calc(var(--reveal-x, 44px) * var(--reveal-x-sign) * -1) 0;
+}
+
+html.reveal-ready .reveal[data-reveal='end']:not(.is-inview) {
+  translate: calc(var(--reveal-x, 44px) * var(--reveal-x-sign)) 0;
+}
+
+html.reveal-ready .reveal[data-reveal='scale']:not(.is-inview) {
+  scale: var(--reveal-scale, 0.94);
+}
+
+/* Reserved for oversized display type, where the blur is worth the paint. */
+html.reveal-ready .reveal[data-reveal='blur']:not(.is-inview) {
+  translate: 0 calc(var(--reveal-y, 32px) * 0.45);
+  filter: blur(var(--reveal-blur, 10px));
+}
+
+/* Curtain: the frame wipes open and the artwork settles behind it. */
+html.reveal-ready .reveal[data-reveal='curtain']:not(.is-inview) {
+  clip-path: inset(0 0 100% 0);
+  scale: 1.035;
+}
+
+html.reveal-ready .reveal.is-inview {
+  opacity: 1;
+  translate: none;
+  scale: none;
+  filter: none;
+  clip-path: none;
+}
+
+/* Mounted after the opening sequence: present, but never re-animated. */
+html.reveal-ready .reveal[data-reveal-instant] {
+  transition: none;
+}
+
+/* --------------------------------------------------------------
+   Hero — the page assembles behind the rising loader curtain
+   -------------------------------------------------------------- */
+
+.hero-title-mask {
+  overflow: hidden;
+  padding-block: 0.18em;
+  margin-block: -0.18em;
+}
+
+html.reveal-ready .hero-frame img {
+  scale: 1.14;
+  transition:
+    transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
+    scale 1.5s var(--reveal-ease-expo) 260ms;
+}
+
+html.reveal-ready .hero-frame.is-inview img {
+  scale: 1;
+}
+
+/* --------------------------------------------------------------
+   Section head — numbered editorial lockup with a drawing rule
+   -------------------------------------------------------------- */
+
+.section-head__meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.section-head__index {
+  flex: none;
+  font-size: 0.86rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  font-variant-numeric: tabular-nums;
+  color: var(--kompreno-red);
+}
+
+.section-head__rule {
+  flex: 1 1 auto;
+  min-width: 36px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(215, 25, 32, 0.5), rgba(42, 28, 24, 0.06));
+  transform-origin: left center;
+  scale: 0 1;
+  transition: scale 1.15s var(--reveal-ease-expo) calc(var(--reveal-delay, 0ms) + 160ms);
+}
+
+[dir='rtl'] .section-head__rule {
+  transform-origin: right center;
+}
+
+.section-head.is-inview .section-head__rule {
+  scale: 1 1;
+}
+
+.section-head__eyebrow {
+  flex: none;
+  white-space: nowrap;
+}
+
+.section-head__title-mask {
+  overflow: hidden;
+  padding-block: 0.16em;
+  margin-block: -0.16em;
+}
+
+.section-head--dark .section-head__index {
+  color: var(--kompreno-yellow);
+}
+
+.section-head--dark .section-head__rule {
+  background: linear-gradient(90deg, rgba(245, 211, 58, 0.55), rgba(255, 255, 255, 0.08));
+}
+
+[dir='rtl'] .section-head--dark .section-head__rule {
+  background: linear-gradient(270deg, rgba(245, 211, 58, 0.55), rgba(255, 255, 255, 0.08));
+}
+
+/* --------------------------------------------------------------
+   Cards — diagonal cascade with a curtain on the artwork
+   -------------------------------------------------------------- */
+
+html.reveal-ready .card-media img {
+  scale: 1.16;
+  transition:
+    transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1),
+    scale 1.4s var(--reveal-ease-expo) 180ms;
+}
+
+.card.is-inview .card-media img,
+.product-card.is-inview .card-media img {
+  scale: 1;
+}
+
+/* --------------------------------------------------------------
+   Highlight block — light sweep once it lands
+   -------------------------------------------------------------- */
+
+.highlight-box {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.highlight-box::after {
+  content: '';
+  position: absolute;
+  inset: -30% -45%;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.4) 50%, transparent 58%);
+  translate: -60% 0;
+}
+
+html.reveal-ready .highlight-box.is-inview::after {
+  animation: kompreno-highlight-sheen 1.5s var(--reveal-ease-expo) 420ms both;
+}
+
+@keyframes kompreno-highlight-sheen {
+  0% {
+    opacity: 0;
+    translate: -60% 0;
+  }
+
+  24% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 0;
+    translate: 60% 0;
+  }
+}
+
+/* --------------------------------------------------------------
+   Section rail — fixed chapter gauge
+   -------------------------------------------------------------- */
+
+.section-rail {
+  position: fixed;
+  inset-inline-end: 24px;
+  top: 50%;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  translate: calc(20px * var(--reveal-x-sign)) -50%;
+  transition:
+    opacity 0.55s var(--reveal-ease-soft),
+    translate 0.7s var(--reveal-ease-expo),
+    visibility 0.7s;
+}
+
+.section-rail.is-visible {
+  opacity: 1;
+  visibility: visible;
+  translate: 0 -50%;
+}
+
+.section-rail__gauge {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: calc(var(--rail-items, 4) * 42px);
+}
+
+.section-rail__track {
+  position: absolute;
+  inset-block: 21px;
+  inset-inline-start: 3px;
+  width: 1px;
+  background: rgba(42, 28, 24, 0.16);
+  overflow: hidden;
+}
+
+.section-rail__fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--kompreno-red), var(--kompreno-yellow));
+  transform-origin: top center;
+}
+
+.section-rail__tick {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+}
+
+.section-rail__dot {
+  position: relative;
+  z-index: 1;
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: rgba(42, 28, 24, 0.24);
+  box-shadow: 0 0 0 4px rgba(230, 231, 229, 0.92);
+  transition:
+    background 0.35s ease,
+    box-shadow 0.35s ease,
+    scale 0.5s var(--reveal-ease-snap);
+}
+
+.section-rail__tick.is-active .section-rail__dot {
+  background: var(--kompreno-red);
+  scale: 1.3;
+  box-shadow: 0 0 0 5px rgba(215, 25, 32, 0.14);
+}
+
+.section-rail__index {
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  font-variant-numeric: tabular-nums;
+  color: rgba(42, 28, 24, 0.32);
+  transition: color 0.35s ease;
+}
+
+.section-rail__tick.is-active .section-rail__index {
+  color: var(--kompreno-red);
+}
+
+.section-rail__label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--kompreno-charcoal);
+  white-space: nowrap;
+}
+
+.rail-label-enter-active,
+.rail-label-leave-active {
+  transition:
+    opacity 0.35s ease,
+    translate 0.45s var(--reveal-ease-expo);
+}
+
+.rail-label-enter-from {
+  opacity: 0;
+  translate: calc(12px * var(--reveal-x-sign)) 0;
+}
+
+.rail-label-leave-to {
+  opacity: 0;
+  translate: calc(-12px * var(--reveal-x-sign)) 0;
+}
+
+@media (max-width: 1180px) {
+  .section-rail {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------
+   Reduced motion — the layout is the destination, not the journey
+   -------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+  html.reveal-ready .reveal,
+  html.reveal-ready .reveal:not(.is-inview) {
+    opacity: 1 !important;
+    translate: none !important;
+    scale: none !important;
+    filter: none !important;
+    clip-path: none !important;
+    transition: none !important;
+  }
+
+  .section-head__rule,
+  .section-head.is-inview .section-head__rule {
+    scale: 1 1 !important;
+    transition: none !important;
+  }
+
+  html.reveal-ready .hero-frame img,
+  html.reveal-ready .card-media img {
+    scale: none !important;
+    transition: none !important;
+  }
+
+  .highlight-box::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  .section-rail,
+  .section-rail.is-visible,
+  .rail-label-enter-active,
+  .rail-label-leave-active {
     transition-duration: 0.01ms;
   }
 }

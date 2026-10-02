@@ -5,6 +5,7 @@ type LoaderPhase = 'loading' | 'exiting' | 'done'
 
 const LOGO_SRC = '/images/logo/logo-without-background.png'
 const SESSION_KEY = 'kompreno.loader.seen'
+const READY_EVENT = 'kompreno:ready'
 const MIN_DURATION = 1600
 const MAX_DURATION = 4500
 const EXIT_DURATION = 1150
@@ -82,6 +83,10 @@ const startExit = () => {
   unlockScroll()
 
   if (!prefersReducedMotion()) document.documentElement.classList.add('loader-reveal')
+
+  // The curtain starts travelling here, so the scroll reveal choreography is
+  // released at the same moment and the page assembles behind the opening.
+  window.dispatchEvent(new CustomEvent(READY_EVENT))
 
   exitTimeout = window.setTimeout(() => {
     try {

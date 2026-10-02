@@ -4,7 +4,10 @@ const props = defineProps<{ text: Record<string, any> }>()
 
 <template>
   <footer class="footer">
-    <div class="container footer-inner">
+    <div
+      class="container footer-inner"
+      v-reveal="{ from: 'up', distance: 20, duration: 900, ease: 'soft' }"
+    >
       <div class="footer-brand">
         <img src="/images/logo/logo-without-background.png" alt="MR.KOMPRENO footer logo" />
         <small>{{ props.text.footer.designed }} {{ props.text.footer.provider }}</small>

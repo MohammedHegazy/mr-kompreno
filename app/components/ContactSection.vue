@@ -42,19 +42,31 @@ const channels = computed(() => [
 <template>
   <section id="contact" class="section">
     <div class="container">
-      <div class="contact-panel">
+      <div class="contact-panel" v-reveal="{ from: 'up', distance: 58, duration: 1200, ease: 'soft' }">
         <BrandMotionBackground variant="ember" />
 
         <div>
-          <div class="section-head">
-            <small>{{ props.text.contact.eyebrow }}</small>
-            <h2>{{ props.text.contact.title }}</h2>
-          </div>
+          <SectionHead
+            :eyebrow="props.text.contact.eyebrow"
+            :title="props.text.contact.title"
+            index="04"
+            tone="dark"
+          />
 
-          <p>{{ props.text.about.body }}</p>
+          <p v-reveal="{ from: 'up', distance: 22, duration: 1000, delay: 220 }">
+            {{ props.text.about.body }}
+          </p>
 
           <div class="social-links">
-            <a v-for="link in props.socialLinks" :key="link.label" :href="link.href" class="social-link" target="_blank" rel="noreferrer">
+            <a
+              v-for="link in props.socialLinks"
+              :key="link.label"
+              class="social-link"
+              :href="link.href"
+              target="_blank"
+              rel="noreferrer"
+              v-reveal="{ from: 'up', distance: 16, duration: 800, delay: 300, stagger: 80 }"
+            >
               <Icon :name="link.icon" class="social-icon" aria-hidden="true" />
               <span>{{ link.label }}</span>
             </a>
@@ -69,6 +81,7 @@ const channels = computed(() => [
             :href="channel.href"
             :target="channel.external ? '_blank' : undefined"
             :rel="channel.external ? 'noreferrer' : undefined"
+            v-reveal="{ from: 'end', distance: 34, duration: 900, delay: 260, stagger: 90 }"
           >
             <span class="contact-item-label">
               <Icon :name="channel.icon" class="contact-item-icon" aria-hidden="true" />
