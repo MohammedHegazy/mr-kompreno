@@ -16,6 +16,15 @@ const filteredProducts = computed(() => {
   return products.filter((product) => product.categoryId === activeCategory.value)
 })
 
+function selectCategory(categoryId: string) {
+  activeCategory.value = categoryId
+
+  nextTick(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    document.getElementById('menu')?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+  })
+}
+
 useSeoMeta({
   title: computed(() => (locale.value === 'ar' ? 'MR.KOMPRENO | القائمة الرقمية' : 'MR.KOMPRENO | Digital Menu')),
   description: computed(() => (locale.value === 'ar' ? 'قائمة رقمية احترافية لعلامة MR.KOMPRENO الغذائية.' : 'Professional digital menu and brand experience for MR.KOMPRENO.')),
@@ -37,7 +46,7 @@ useSeoMeta({
       />
 
       <main>
-        <BrandHero :text="currentText" :locale="locale" :topics="heroTopics" :spotlight="heroSpotlight" />
+        <BrandHero :text="currentText" :locale="locale" :topics="heroTopics" :spotlight="heroSpotlight" @select="selectCategory" />
         <FeaturedProducts :items="featuredProducts" :text="currentText" :locale="locale" />
         <BrandIntro :text="currentText" />
 
@@ -55,7 +64,7 @@ useSeoMeta({
                   :key="category.id"
                   class="category-button"
                   :class="{ active: activeCategory === category.id }"
-                  @click="activeCategory = category.id"
+                  @click="selectCategory(category.id)"
                 >
                   <Icon :name="category.icon" class="category-icon" aria-hidden="true" />
                   {{ category.name[locale] }}

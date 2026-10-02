@@ -2,6 +2,8 @@
 import type { Locale, MenuCategory, MenuProduct } from '~/data/menu'
 import BrandMotionBackground from './BrandMotionBackground.vue'
 
+const emit = defineEmits<{ select: [categoryId: string] }>()
+
 const props = defineProps<{
   text: Record<string, any>
   locale: Locale
@@ -42,10 +44,10 @@ const props = defineProps<{
 
         <ul class="hero-topics">
           <li v-for="topic in props.topics" :key="topic.id">
-            <a href="#menu" class="hero-topic">
+            <button type="button" class="hero-topic" @click="emit('select', topic.id)">
               <Icon :name="topic.icon" class="hero-topic-icon" aria-hidden="true" />
               {{ topic.name[props.locale] }}
-            </a>
+            </button>
           </li>
         </ul>
       </div>
