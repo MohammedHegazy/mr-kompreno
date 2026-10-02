@@ -97,6 +97,8 @@ onUnmounted(() => {
 <template>
   <header class="site-header" :class="{ 'is-scrolled': isScrolled }">
     <div class="container header-inner">
+      <BrandMotionBackground variant="hero" />
+
       <a href="#home" class="brand-mark" aria-label="KOMPRENO home">
         <img src="/images/logo/logo-without-background.png" alt="KOMPRENO logo" />
         <span class="brand-name">Mr.Kompreno</span>
@@ -147,6 +149,8 @@ onUnmounted(() => {
           aria-modal="true"
           :aria-label="locale === 'ar' ? 'القائمة الرئيسية' : 'Main menu'"
         >
+          <BrandMotionBackground variant="ember" />
+
           <div class="mobile-menu-top">
             <span>{{ locale === 'ar' ? 'القائمة' : 'Menu' }}</span>
             <button

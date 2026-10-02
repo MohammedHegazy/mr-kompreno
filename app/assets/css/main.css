@@ -67,6 +67,8 @@ button {
 
 .header-inner {
   position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -79,6 +81,11 @@ button {
   background: var(--kompreno-red);
   box-shadow: 0 12px 28px rgba(42, 28, 24, 0.16);
   transition: width 0.32s cubic-bezier(0.22, 1, 0.36, 1), min-height 0.32s cubic-bezier(0.22, 1, 0.36, 1), padding 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.header-inner > :not(.brand-motion) {
+  position: relative;
+  z-index: 1;
 }
 
 .site-header.is-scrolled {
@@ -241,6 +248,8 @@ button {
 }
 
 .mobile-menu-panel {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -251,6 +260,11 @@ button {
   background: var(--kompreno-red);
   color: var(--kompreno-yellow);
   box-shadow: 18px 0 42px rgba(42, 28, 24, 0.24);
+}
+
+.mobile-menu-panel > :not(.brand-motion) {
+  position: relative;
+  z-index: 1;
 }
 
 .mobile-menu-top {
