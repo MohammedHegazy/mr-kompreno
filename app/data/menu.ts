@@ -158,7 +158,7 @@ export const textContent = {
       contact: 'Contact',
     },
     hero: {
-      eyebrow: 'KOMPRENO',
+      eyebrow: 'MR.KOMPRENO',
       title: 'Bold flavor. Big comfort.',
       subtitle: 'A modern digital menu celebrating loaded potatoes, pizza, and warm fast-casual comfort food.',
       primary: 'Browse menu',
@@ -167,7 +167,7 @@ export const textContent = {
     about: {
       eyebrow: 'About us',
       title: 'Comfort food with personality.',
-      body: 'KOMPRENO brings a vibrant, approachable food experience that balances bold ingredients, rich comfort, and a memorable brand character.',
+      body: 'MR.KOMPRENO brings a vibrant, approachable food experience that balances bold ingredients, rich comfort, and a memorable brand character.',
       highlight: 'Made for sharing, made for cravings.',
     },
     menu: {
@@ -200,7 +200,7 @@ export const textContent = {
       contact: 'تواصل',
     },
     hero: {
-      eyebrow: 'كومبرينو',
+      eyebrow: 'MR.KOMPRENO',
       title: 'نكهة قوية. راحة كبيرة.',
       subtitle: 'قائمة رقمية حديثة تحتفي بالبطاطا المحمصة والبيتزا والطعام المريح والودود.',
       primary: 'تصفح القائمة',
@@ -209,7 +209,7 @@ export const textContent = {
     about: {
       eyebrow: 'من نحن',
       title: 'طعام مريح بشخصية قوية.',
-      body: 'تجمع كومبرينو تجربة طعام نابضة بالحياة وودودة مع مكونات غنية وطعم مريح وشخصية علامة تجارية لا تُنسى.',
+      body: 'تجمع MR.KOMPRENO تجربة طعام نابضة بالحياة وودودة مع مكونات غنية وطعم مريح وشخصية علامة تجارية لا تُنسى.',
       highlight: 'مصنوع للمشاركة، ومصنوع للشهيات.',
     },
     menu: {

@@ -13,9 +13,9 @@ const filteredProducts = computed(() => {
 })
 
 useSeoMeta({
-  title: computed(() => (locale.value === 'ar' ? 'KOMPRENO | القائمة الرقمية' : 'KOMPRENO | Digital Menu')),
-  description: computed(() => (locale.value === 'ar' ? 'قائمة رقمية احترافية لعلامة كومبرينو الغذائية.' : 'Professional digital menu and brand experience for KOMPRENO.')),
-  ogTitle: 'KOMPRENO',
+  title: computed(() => (locale.value === 'ar' ? 'MR.KOMPRENO | القائمة الرقمية' : 'MR.KOMPRENO | Digital Menu')),
+  description: computed(() => (locale.value === 'ar' ? 'قائمة رقمية احترافية لعلامة MR.KOMPRENO الغذائية.' : 'Professional digital menu and brand experience for MR.KOMPRENO.')),
+  ogTitle: 'MR.KOMPRENO',
   ogDescription: 'A premium bilingual digital menu and brand showcase.',
 })
 </script>

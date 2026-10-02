@@ -6,6 +6,8 @@
   --kompreno-charcoal: #2a1c18;
   --kompreno-beige: #f3e2c6;
   --kompreno-ivory: #f7f1e7;
+  --kompreno-canvas: #e6e7e5;
+  --kompreno-canvas-light: #eff0ee;
   --kompreno-white: #ffffff;
   --kompreno-muted: #c84b2a;
   --shadow-soft: 0 18px 38px rgba(34, 17, 15, 0.12);
@@ -23,7 +25,7 @@ html {
 body {
   margin: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(180deg, #fffdf8 0%, #fff7f0 100%);
+  background: var(--kompreno-canvas);
   color: var(--kompreno-charcoal);
 }
 
@@ -47,9 +49,7 @@ button {
 
 .page-shell {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top, rgba(245, 211, 58, 0.12), transparent 20%),
-    linear-gradient(180deg, #fffdf9 0%, #fffaf2 100%);
+  background: linear-gradient(180deg, var(--kompreno-canvas-light) 0%, var(--kompreno-canvas) 100%);
 }
 
 .container {
@@ -451,9 +451,9 @@ button {
 
 .hero-copy h1 {
   margin: 18px 0 16px;
-  font-size: clamp(2.3rem, 5vw, 4.5rem);
-  line-height: 0.98;
-  letter-spacing: -0.06em;
+  font-size: 3rem;
+  line-height: 1.12;
+  letter-spacing: 0;
 }
 
 .hero-copy p {
@@ -846,6 +846,10 @@ button {
     grid-template-columns: 1fr;
   }
 
+  .hero-copy h1 {
+    font-size: 2.5rem;
+  }
+
   .header-inner {
     min-height: 74px;
     padding-inline: 14px;
@@ -875,6 +879,10 @@ button {
 
   .hero-copy {
     padding: 10px 4px;
+  }
+
+  .hero-copy h1 {
+    font-size: 2.125rem;
   }
 
   .hero-card img {

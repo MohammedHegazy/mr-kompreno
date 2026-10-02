@@ -1,6 +1,6 @@
-# Mr. KOMPRENO Digital Menu
+# MR.KOMPRENO Digital Menu
 
-E-Menu for Mr.Kompreno: a responsive, bilingual English/Arabic Nuxt application with RTL support, a filterable product menu, and locally bundled Iconify icons.
+E-Menu for MR.KOMPRENO: a responsive, bilingual English/Arabic Nuxt application with RTL support, a filterable product menu, and locally bundled Iconify icons.
 
 ## Requirements
 

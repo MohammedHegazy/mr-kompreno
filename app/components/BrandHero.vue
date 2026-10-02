@@ -28,8 +28,8 @@ const props = defineProps<{ text: Record<string, any> }>()
 
       <div class="hero-visual">
         <div class="hero-card">
-          <img src="/items/1611741895534.jpg" alt="Featured KOMPRENO product" />
-          <div class="hero-badge">KOMPRENO</div>
+          <img src="/items/1611741895534.jpg" alt="Featured MR.KOMPRENO product" />
+          <div class="hero-badge">MR.KOMPRENO</div>
         </div>
       </div>
     </div>

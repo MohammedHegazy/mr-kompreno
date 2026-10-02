@@ -102,9 +102,9 @@ onUnmounted(() => {
     <div class="container header-inner">
       <BrandMotionBackground variant="hero" />
 
-      <a href="#home" class="brand-mark" aria-label="KOMPRENO home">
-        <img src="/images/logo/logo-without-background.png" alt="KOMPRENO logo" />
-        <span class="brand-name">Mr.Kompreno</span>
+      <a href="#home" class="brand-mark" aria-label="MR.KOMPRENO home">
+        <img src="/images/logo/logo-without-background.png" alt="MR.KOMPRENO logo" />
+        <span class="brand-name">MR.KOMPRENO</span>
       </a>
 
       <nav id="main-navigation" class="nav-links" aria-label="Main navigation">
