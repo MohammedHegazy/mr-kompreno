@@ -1,5 +1,5 @@
 <script setup lang="ts">
-withDefaults(defineProps<{ variant?: 'hero' | 'ember' }>(), {
+withDefaults(defineProps<{ variant?: 'hero' | 'ember' | 'canvas' }>(), {
   variant: 'hero',
 })
 </script>

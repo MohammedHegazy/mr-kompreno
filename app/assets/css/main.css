@@ -48,8 +48,15 @@ button {
 }
 
 .page-shell {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
   background: linear-gradient(180deg, var(--kompreno-canvas-light) 0%, var(--kompreno-canvas) 100%);
+}
+
+.page-content {
+  position: relative;
+  z-index: 1;
 }
 
 .container {
@@ -380,6 +387,12 @@ button {
   --motion-glint: rgba(255, 229, 112, 0.1);
 }
 
+.brand-motion--canvas {
+  --motion-line: rgba(215, 25, 32, 0.12);
+  --motion-shade: rgba(245, 211, 58, 0.2);
+  --motion-glint: rgba(215, 25, 32, 0.16);
+}
+
 .brand-motion__pattern {
   position: absolute;
   inset: -45%;
@@ -390,11 +403,25 @@ button {
   animation: kompreno-pattern-drift 36s linear infinite;
 }
 
+.brand-motion--canvas .brand-motion__pattern {
+  opacity: 0.78;
+  background-image:
+    repeating-linear-gradient(132deg, transparent 0 68px, rgba(215, 25, 32, 0.1) 69px 71px, transparent 72px 138px),
+    repeating-linear-gradient(42deg, transparent 0 22px, rgba(245, 211, 58, 0.2) 23px 25px, transparent 26px 48px);
+  background-size: 360px 320px, 180px 180px;
+  animation-name: kompreno-canvas-drift;
+}
+
 .brand-motion__etching {
   position: absolute;
   inset: 0;
   opacity: 0.5;
   background-image: repeating-linear-gradient(0deg, transparent 0 31px, rgba(255, 255, 255, 0.025) 32px, transparent 33px 64px);
+}
+
+.brand-motion--canvas .brand-motion__etching {
+  opacity: 0.55;
+  background-image: repeating-linear-gradient(0deg, transparent 0 78px, rgba(215, 25, 32, 0.035) 79px, transparent 80px 156px);
 }
 
 .brand-motion__sweep {
@@ -416,9 +443,22 @@ button {
   opacity: 0.75;
 }
 
+.brand-motion--canvas .brand-motion__sweep--one {
+  background: linear-gradient(90deg, transparent, rgba(245, 211, 58, 0.28) 44%, rgba(215, 25, 32, 0.1) 58%, transparent);
+}
+
+.brand-motion--canvas .brand-motion__sweep--two {
+  background: linear-gradient(90deg, transparent, rgba(215, 25, 32, 0.2) 44%, rgba(200, 75, 42, 0.12) 58%, transparent);
+}
+
 @keyframes kompreno-pattern-drift {
   from { background-position: 0 0, 0 0; }
   to { background-position: 280px 130px, -140px 140px; }
+}
+
+@keyframes kompreno-canvas-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(360px, 320px, 0); }
 }
 
 @keyframes kompreno-heat-pass {
