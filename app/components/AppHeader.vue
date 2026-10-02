@@ -103,7 +103,7 @@ onUnmounted(() => {
       <BrandMotionBackground variant="hero" />
 
       <a href="#home" class="brand-mark" aria-label="MR.KOMPRENO home">
-        <img src="/images/logo/logo-without-background.png" alt="MR.KOMPRENO logo" />
+        <SkeletonImage src="/images/logo/logo-without-background.png" alt="MR.KOMPRENO logo" :width="280" :height="270" />
         <span class="brand-name">MR.KOMPRENO</span>
       </a>
 

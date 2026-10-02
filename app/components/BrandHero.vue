@@ -20,7 +20,7 @@ const props = defineProps<{
       <div class="hero-copy">
         <div class="hero-brand" v-reveal="{ from: 'up', distance: 22, duration: 900 }">
           <span class="hero-logo">
-            <img src="/images/logo/logo-without-background.png" alt="MR.KOMPRENO" width="280" height="270" />
+            <SkeletonImage src="/images/logo/logo-without-background.png" alt="MR.KOMPRENO" :width="280" :height="270" />
           </span>
           <span class="hero-kicker">
             <span class="hero-kicker-dot" aria-hidden="true" />
@@ -66,13 +66,11 @@ const props = defineProps<{
           class="hero-frame"
           v-reveal="{ from: 'curtain', duration: 1400, delay: 240, ease: 'mask' }"
         >
-          <img
+          <SkeletonImage
             :src="props.spotlight.image"
             :alt="props.spotlight.name[props.locale]"
-            width="1200"
-            height="800"
-            fetchpriority="high"
-            decoding="async"
+            :width="1200"
+            :height="800"
           />
         </figure>
 

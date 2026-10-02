@@ -92,7 +92,7 @@ useSeoMeta({
                       class="card-media"
                       v-reveal="{ from: 'curtain', duration: 1000, delay: 200, ease: 'mask' }"
                     >
-                      <img :src="product.image" :alt="product.name[locale]" loading="lazy" decoding="async" />
+                      <SkeletonImage :src="product.image" :alt="product.name[locale]" />
                     </div>
                     <div class="card-body">
                       <h3 v-reveal="{ from: 'up', distance: 16, duration: 800, delay: 180 }">

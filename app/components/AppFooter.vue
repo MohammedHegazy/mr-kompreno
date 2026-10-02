@@ -9,7 +9,7 @@ const props = defineProps<{ text: Record<string, any> }>()
       v-reveal="{ from: 'up', distance: 20, duration: 900, ease: 'soft' }"
     >
       <div class="footer-brand">
-        <img src="/images/logo/logo-without-background.png" alt="MR.KOMPRENO footer logo" />
+        <SkeletonImage src="/images/logo/logo-without-background.png" alt="MR.KOMPRENO footer logo" :width="280" :height="270" />
         <small>{{ props.text.footer.designed }} {{ props.text.footer.provider }}</small>
       </div>
 

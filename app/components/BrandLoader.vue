@@ -206,7 +206,7 @@ onUnmounted(() => {
         <span class="brand-loader__burner brand-loader__burner--halo" aria-hidden="true" />
 
         <span class="brand-loader__mark">
-          <img :src="LOGO_SRC" alt="" width="280" height="270" decoding="async" />
+          <SkeletonImage :src="LOGO_SRC" alt="" :width="280" :height="270" />
         </span>
 
         <p class="brand-loader__title">MR.KOMPRENO</p>

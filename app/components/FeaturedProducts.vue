@@ -25,7 +25,7 @@ const props = defineProps<{ items: MenuProduct[]; text: Record<string, any>; loc
             class="card-media"
             v-reveal="{ from: 'curtain', duration: 1100, delay: 180, ease: 'mask' }"
           >
-            <img :src="item.image" :alt="item.name[props.locale]" decoding="async" />
+            <SkeletonImage :src="item.image" :alt="item.name[props.locale]" />
           </div>
 
           <div class="card-body">

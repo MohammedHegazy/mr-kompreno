@@ -2467,11 +2467,15 @@ html.reveal-ready .highlight-box.is-inview::after {
   white-space: nowrap;
 }
 
-.rail-label-enter-active,
-.rail-label-leave-active {
+.rail-label-enter-active {
   transition:
     opacity 0.35s ease,
     translate 0.45s var(--reveal-ease-expo);
+}
+
+/* The outgoing label leaves instantly so the text never lags the tick. */
+.rail-label-leave-active {
+  transition: none;
 }
 
 .rail-label-enter-from {
@@ -2479,15 +2483,73 @@ html.reveal-ready .highlight-box.is-inview::after {
   translate: calc(12px * var(--reveal-x-sign)) 0;
 }
 
-.rail-label-leave-to {
-  opacity: 0;
-  translate: calc(-12px * var(--reveal-x-sign)) 0;
-}
-
 @media (max-width: 1180px) {
   .section-rail {
     display: none;
   }
+}
+
+/* --------------------------------------------------------------
+   Skeleton images
+   Every artwork streams in lazily, so each one holds its exact box
+   behind a brand-tinted sweep until the bytes land. The sweep rides a
+   translate, which keeps it on the compositor and never repaints.
+   -------------------------------------------------------------- */
+
+.skeleton-image {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.skeleton-image__shimmer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+  background: rgba(42, 28, 24, 0.08);
+  transition: opacity 0.32s ease;
+}
+
+.skeleton-image__shimmer::after {
+  content: '';
+  position: absolute;
+  inset: -40% -60%;
+  background: linear-gradient(105deg, transparent 42%, rgba(245, 211, 58, 0.42) 50%, transparent 58%);
+  translate: -70% 0;
+  animation: kompreno-skeleton-sweep 1.6s var(--reveal-ease-soft) infinite;
+}
+
+@keyframes kompreno-skeleton-sweep {
+  to {
+    translate: 70% 0;
+  }
+}
+
+/* The logo plates sit on charcoal, so their placeholder warms up instead. */
+.hero-logo .skeleton-image__shimmer,
+.brand-loader__mark .skeleton-image__shimmer {
+  background: rgba(245, 211, 58, 0.12);
+}
+
+.skeleton-image.is-loaded .skeleton-image__shimmer,
+.skeleton-image.is-failed .skeleton-image__shimmer {
+  opacity: 0;
+}
+
+/* Inside a flex row the plate is pinned to the box the artwork used to take. */
+.brand-mark .skeleton-image {
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+}
+
+.footer-brand .skeleton-image {
+  width: 140px;
+  height: auto;
+  flex: none;
 }
 
 /* --------------------------------------------------------------
@@ -2521,6 +2583,11 @@ html.reveal-ready .highlight-box.is-inview::after {
   .highlight-box::after {
     animation: none !important;
     opacity: 0 !important;
+  }
+
+  .skeleton-image__shimmer::after {
+    animation: none !important;
+    opacity: 0.55;
   }
 
   .section-rail,
