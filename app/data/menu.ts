@@ -28,8 +28,6 @@ export const menuCategories: MenuCategory[] = [
   { id: 'all', name: { en: 'All', ar: 'الكل' }, icon: 'lucide:layout-grid' },
   { id: 'loaded-potatoes', name: { en: 'Loaded Potatoes', ar: 'بطاطا محمصة' }, icon: 'lucide:flame' },
   { id: 'pizza', name: { en: 'Pizza', ar: 'بيتزا' }, icon: 'lucide:pizza' },
-  { id: 'combos', name: { en: 'Combos', ar: 'مجموعات' }, icon: 'lucide:users-round' },
-  { id: 'sides', name: { en: 'Sides', ar: 'إضافات' }, icon: 'lucide:utensils-crossed' },
 ]
 
 export const featuredProducts: MenuProduct[] = [
@@ -55,7 +53,7 @@ export const featuredProducts: MenuProduct[] = [
   },
   {
     id: 'featured-3',
-    categoryId: 'combos',
+    categoryId: 'pizza',
     name: { en: 'Family Combo', ar: 'باقة العائلة' },
     description: { en: 'A balanced combo designed for sharing, filled with comfort-food favorites.', ar: 'باقة متوازنة مناسبة للمشاركة وتجمع بين أفضل المذاق المريح.' },
     price: 18,
@@ -123,7 +121,7 @@ export const products: MenuProduct[] = [
   },
   {
     id: 'p07',
-    categoryId: 'combos',
+    categoryId: 'pizza',
     name: { en: 'Family Combo', ar: 'باقة العائلة' },
     description: { en: 'A combo built for sharing with signature comfort-food flavors.', ar: 'باقة تجمع بين المذاقات المميزة وتجربة مشاركة أصلية.' },
     price: 18,
@@ -132,7 +130,7 @@ export const products: MenuProduct[] = [
   },
   {
     id: 'p08',
-    categoryId: 'sides',
+    categoryId: 'loaded-potatoes',
     name: { en: 'Crispy Side Plate', ar: 'طبق جانبي مقرمش' },
     description: { en: 'A quick, satisfying extra to round out your meal.', ar: 'إضافة خفيفة ومشبعة تكمل الوجبة بطريقة ممتعة.' },
     price: 7,
@@ -141,7 +139,7 @@ export const products: MenuProduct[] = [
   },
   {
     id: 'p09',
-    categoryId: 'sides',
+    categoryId: 'loaded-potatoes',
     name: { en: 'Signature Extras', ar: 'إضافات مميزة' },
     description: { en: 'Small add-ons designed to enhance the main meal.', ar: 'إضافات صغيرة تضيف نكهة وتوازن للوجبة الرئيسية.' },
     price: 6,
@@ -184,7 +182,6 @@ export const textContent = {
       whatsapp: 'WhatsApp',
       instagram: 'Instagram',
       facebook: 'Facebook',
-      website: 'Website',
       button: 'Follow us',
       pending: 'To be confirmed',
     },
@@ -227,7 +224,6 @@ export const textContent = {
       whatsapp: 'واتساب',
       instagram: 'إنستغرام',
       facebook: 'فيسبوك',
-      website: 'الموقع',
       button: 'تابعنا',
       pending: 'سيتم التأكيد لاحقًا',
     },
@@ -243,5 +239,4 @@ export const socialLinks = [
   { label: 'Instagram', href: 'https://www.instagram.com/mrkompreno/', icon: 'simple-icons:instagram' },
   { label: 'Facebook', href: 'https://www.facebook.com/KOMPRENO.MR', icon: 'simple-icons:facebook' },
   { label: 'WhatsApp', href: 'https://wa.me/963955403020', icon: 'simple-icons:whatsapp' },
-  { label: 'Website', href: 'https://mr-kompreno.com/', icon: 'lucide:globe' },
 ]

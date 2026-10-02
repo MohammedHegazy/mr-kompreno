@@ -937,10 +937,17 @@ button {
   min-height: 48px;
   padding: 0 16px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--kompreno-white);
+  border: 1px solid rgba(245, 211, 58, 0.5);
+  background: rgba(245, 211, 58, 0.12);
+  color: var(--kompreno-yellow);
   font-weight: 700;
+}
+
+.social-link:hover,
+.social-link:focus-visible {
+  background: var(--kompreno-yellow);
+  border-color: var(--kompreno-yellow);
+  color: var(--kompreno-charcoal);
 }
 
 .social-icon {
@@ -960,34 +967,38 @@ button {
   justify-content: space-between;
   gap: 16px;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(245, 211, 58, 0.1);
+  border: 1px solid rgba(245, 211, 58, 0.3);
   border-radius: 16px;
-  color: var(--kompreno-white);
+  color: var(--kompreno-yellow);
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.contact-whatsapp {
+.contact-item:hover,
+.contact-item:focus-visible {
+  background: rgba(245, 211, 58, 0.18);
+  border-color: var(--kompreno-yellow);
+  color: var(--kompreno-yellow);
+  transform: translateY(-1px);
+}
+
+.contact-item-label {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--kompreno-yellow);
+  font-weight: 700;
   white-space: nowrap;
-  direction: ltr;
-  unicode-bidi: isolate;
 }
 
-.contact-number {
-  color: var(--kompreno-white);
-  font-weight: 800;
-  white-space: nowrap;
-  direction: ltr;
-  unicode-bidi: isolate;
-}
-
-.contact-whatsapp-icon {
+.contact-item-icon {
   width: 18px;
   height: 18px;
   flex: none;
+}
+
+.contact-item-value {
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .footer {

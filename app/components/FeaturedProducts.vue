@@ -15,7 +15,7 @@ const props = defineProps<{ items: MenuProduct[]; text: Record<string, any>; loc
       <div class="featured-grid">
         <article v-for="item in props.items" :key="item.id" class="card">
           <div class="card-media">
-            <img :src="item.image" :alt="item.name[props.locale]" />
+            <img :src="item.image" :alt="item.name[props.locale]" decoding="async" />
           </div>
           <div class="card-body">
             <h3>{{ item.name[props.locale] }}</h3>

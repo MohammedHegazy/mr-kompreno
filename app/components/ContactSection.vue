@@ -2,6 +2,41 @@
 import BrandMotionBackground from './BrandMotionBackground.vue'
 
 const props = defineProps<{ text: Record<string, any>; socialLinks: Array<{ label: string; href: string; icon: string }> }>()
+
+const channels = computed(() => [
+  {
+    key: 'phone',
+    label: props.text.contact.phone,
+    value: '+963 955 403 020',
+    href: 'tel:+963955403020',
+    icon: 'lucide:phone',
+    external: false,
+  },
+  {
+    key: 'whatsapp',
+    label: props.text.contact.whatsapp,
+    value: '+963 955 403 020',
+    href: 'https://wa.me/963955403020',
+    icon: 'simple-icons:whatsapp',
+    external: true,
+  },
+  {
+    key: 'instagram',
+    label: props.text.contact.instagram,
+    value: '@mrkompreno',
+    href: 'https://www.instagram.com/mrkompreno/',
+    icon: 'simple-icons:instagram',
+    external: true,
+  },
+  {
+    key: 'facebook',
+    label: props.text.contact.facebook,
+    value: 'KOMPRENO.MR',
+    href: 'https://www.facebook.com/KOMPRENO.MR',
+    icon: 'simple-icons:facebook',
+    external: true,
+  },
+])
 </script>
 
 <template>
@@ -27,29 +62,20 @@ const props = defineProps<{ text: Record<string, any>; socialLinks: Array<{ labe
         </div>
 
         <div class="contact-list">
-          <div class="contact-item">
-            <span>{{ props.text.contact.phone }}</span>
-            <a class="contact-number" href="tel:+963955403020" dir="ltr">+963 955 403 020</a>
-          </div>
-          <div class="contact-item">
-            <span>{{ props.text.contact.whatsapp }}</span>
-            <a class="contact-whatsapp" href="https://wa.me/963955403020" target="_blank" rel="noreferrer" dir="ltr">
-              <Icon name="simple-icons:whatsapp" class="contact-whatsapp-icon" aria-hidden="true" />
-              <bdi>+963 955 403 020</bdi>
-            </a>
-          </div>
-          <div class="contact-item">
-            <span>{{ props.text.contact.instagram }}</span>
-            <strong>@mrkompreno</strong>
-          </div>
-          <div class="contact-item">
-            <span>{{ props.text.contact.facebook }}</span>
-            <strong>KOMPRENO.MR</strong>
-          </div>
-          <div class="contact-item">
-            <span>{{ props.text.contact.website }}</span>
-            <strong>mr-kompreno.com</strong>
-          </div>
+          <a
+            v-for="channel in channels"
+            :key="channel.key"
+            class="contact-item"
+            :href="channel.href"
+            :target="channel.external ? '_blank' : undefined"
+            :rel="channel.external ? 'noreferrer' : undefined"
+          >
+            <span class="contact-item-label">
+              <Icon :name="channel.icon" class="contact-item-icon" aria-hidden="true" />
+              <span>{{ channel.label }}</span>
+            </span>
+            <bdi class="contact-item-value">{{ channel.value }}</bdi>
+          </a>
         </div>
       </div>
     </div>
