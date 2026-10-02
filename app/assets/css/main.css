@@ -49,9 +49,9 @@ button {
 
 .page-shell {
   position: relative;
+  z-index: 1;
   isolation: isolate;
   min-height: 100vh;
-  background: linear-gradient(180deg, var(--kompreno-canvas-light) 0%, var(--kompreno-canvas) 100%);
 }
 
 .page-content {
@@ -390,12 +390,6 @@ button {
   --motion-glint: rgba(255, 229, 112, 0.1);
 }
 
-.brand-motion--canvas {
-  --motion-line: rgba(215, 25, 32, 0.15);
-  --motion-shade: rgba(245, 211, 58, 0.28);
-  --motion-glint: rgba(215, 25, 32, 0.2);
-}
-
 .brand-motion__pattern {
   position: absolute;
   inset: -45%;
@@ -406,25 +400,11 @@ button {
   animation: kompreno-pattern-drift 36s linear infinite;
 }
 
-.brand-motion--canvas .brand-motion__pattern {
-  opacity: 0.9;
-  background-image:
-    repeating-linear-gradient(132deg, transparent 0 68px, rgba(215, 25, 32, 0.14) 69px 72px, transparent 73px 138px),
-    repeating-linear-gradient(42deg, transparent 0 22px, rgba(245, 211, 58, 0.24) 23px 27px, transparent 28px 48px);
-  background-size: 360px 320px, 180px 180px;
-  animation-name: kompreno-canvas-drift;
-}
-
 .brand-motion__etching {
   position: absolute;
   inset: 0;
   opacity: 0.5;
   background-image: repeating-linear-gradient(0deg, transparent 0 31px, rgba(255, 255, 255, 0.025) 32px, transparent 33px 64px);
-}
-
-.brand-motion--canvas .brand-motion__etching {
-  opacity: 0.7;
-  background-image: repeating-linear-gradient(0deg, transparent 0 78px, rgba(215, 25, 32, 0.05) 79px, transparent 80px 156px);
 }
 
 .brand-motion__sweep {
@@ -446,16 +426,6 @@ button {
   opacity: 0.75;
 }
 
-.brand-motion--canvas .brand-motion__sweep--one {
-  width: 25%;
-  background: linear-gradient(90deg, transparent, rgba(245, 211, 58, 0.36) 44%, rgba(215, 25, 32, 0.16) 58%, transparent);
-}
-
-.brand-motion--canvas .brand-motion__sweep--two {
-  width: 25%;
-  background: linear-gradient(90deg, transparent, rgba(215, 25, 32, 0.3) 44%, rgba(200, 75, 42, 0.18) 58%, transparent);
-}
-
 @keyframes kompreno-pattern-drift {
   from {
     background-position: 0 0, 0 0;
@@ -463,16 +433,6 @@ button {
 
   to {
     background-position: 280px 130px, -140px 140px;
-  }
-}
-
-@keyframes kompreno-canvas-drift {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-
-  to {
-    transform: translate3d(360px, 320px, 0);
   }
 }
 
@@ -1445,6 +1405,271 @@ button {
     max-width: 48%;
   }
 
+}
+
+/* ==============================================================
+   System backdrop
+   A single fixed, GPU-only light field behind the whole document.
+   Every moving layer animates transform/opacity only, so scrolling
+   never repaints and the still frame stands on its own.
+   ============================================================== */
+
+.system-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  isolation: isolate;
+  pointer-events: none;
+  user-select: none;
+  background: var(--kompreno-canvas);
+}
+
+/* Children are absolutely positioned, so blockification is implicit here. */
+.system-backdrop > span {
+  position: absolute;
+}
+
+.system-backdrop__base {
+  inset: 0;
+  background:
+    radial-gradient(112% 78% at 50% 8%, rgba(255, 255, 255, 0.85), transparent 62%),
+    linear-gradient(180deg, var(--kompreno-canvas-light) 0%, var(--kompreno-canvas) 62%, #e2e3e1 100%);
+}
+
+.system-backdrop__light {
+  width: clamp(640px, 96vw, 1240px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  will-change: transform;
+}
+
+.system-backdrop__light--amber {
+  inset-block-start: -14%;
+  inset-inline-start: -16%;
+  background: radial-gradient(circle at 50% 50%, rgba(247, 198, 90, 0.46) 0%, rgba(247, 198, 90, 0.17) 34%, rgba(247, 198, 90, 0) 66%);
+  animation: kompreno-light-amber 47s ease-in-out infinite;
+}
+
+.system-backdrop__light--ember {
+  inset-block-end: -26%;
+  inset-inline-end: -20%;
+  width: clamp(560px, 86vw, 1100px);
+  background: radial-gradient(circle at 50% 50%, rgba(215, 25, 32, 0.17) 0%, rgba(215, 25, 32, 0.06) 38%, rgba(215, 25, 32, 0) 68%);
+  animation: kompreno-light-ember 73s ease-in-out infinite;
+}
+
+.system-backdrop__light--cool {
+  inset-block-start: 22%;
+  inset-inline-end: -30%;
+  width: clamp(520px, 78vw, 980px);
+  background: radial-gradient(circle at 50% 50%, rgba(74, 96, 110, 0.16) 0%, rgba(74, 96, 110, 0.05) 36%, rgba(74, 96, 110, 0) 66%);
+  animation: kompreno-light-cool 89s ease-in-out infinite;
+}
+
+/* Container-aligned editorial hairlines, drifting so the sheet feels endless. */
+.system-backdrop__rules {
+  inset: -16% 0;
+  display: flex;
+  justify-content: center;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 20%, #000 80%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 20%, #000 80%, transparent 100%);
+  animation: kompreno-grid-drift 113s ease-in-out infinite;
+}
+
+.system-backdrop__rules-grid {
+  position: relative;
+  width: min(var(--container), calc(100% - 32px));
+  background-image: repeating-linear-gradient(90deg, rgba(42, 28, 24, 0.055) 0 1px, transparent 1px calc(100% / 12));
+}
+
+.system-backdrop__baseline {
+  inset-inline: 0;
+  top: 50%;
+  height: 1px;
+  opacity: 0.85;
+  background: linear-gradient(90deg, transparent 0%, rgba(42, 28, 24, 0.06) 18%, rgba(245, 211, 58, 0.16) 50%, rgba(42, 28, 24, 0.06) 82%, transparent 100%);
+  animation: kompreno-baseline-drift 97s ease-in-out infinite;
+}
+
+.system-backdrop__dither {
+  inset: -6%;
+  opacity: 0.62;
+  background-image: radial-gradient(rgba(42, 28, 24, 0.055) 0.5px, transparent 0.6px);
+  background-size: 4px 4px;
+  animation: kompreno-dither-drift 46s linear infinite;
+}
+
+.system-backdrop__sweep {
+  top: -45%;
+  bottom: -45%;
+  inset-inline-start: -34%;
+  width: 28%;
+  opacity: 0;
+  transform: rotate(14deg);
+  mix-blend-mode: soft-light;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.62) 46%, rgba(255, 255, 255, 0.2) 60%, transparent);
+  animation: kompreno-backdrop-sweep 44s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.system-backdrop__vignette {
+  inset: 0;
+  background: radial-gradient(126% 92% at 50% 40%, transparent 40%, rgba(42, 28, 24, 0.05) 76%, rgba(42, 28, 24, 0.115) 100%);
+}
+
+.system-backdrop__grain {
+  inset: 0;
+  opacity: 0.5;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes kompreno-light-amber {
+  0%,
+  100% {
+    transform: translate3d(-7%, 4%, 0) scale(1);
+  }
+
+  34% {
+    transform: translate3d(5%, -7%, 0) scale(1.09);
+  }
+
+  68% {
+    transform: translate3d(11%, 7%, 0) scale(0.95);
+  }
+}
+
+@keyframes kompreno-light-ember {
+  0%,
+  100% {
+    transform: translate3d(9%, -5%, 0) scale(1.05);
+  }
+
+  50% {
+    transform: translate3d(-10%, 9%, 0) scale(0.93);
+  }
+}
+
+@keyframes kompreno-light-cool {
+  0%,
+  100% {
+    transform: translate3d(-7%, -9%, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(8%, 7%, 0) scale(1.12);
+  }
+}
+
+@keyframes kompreno-grid-drift {
+  0%,
+  100% {
+    transform: translate3d(0, -4%, 0);
+  }
+
+  50% {
+    transform: translate3d(0, 4%, 0);
+  }
+}
+
+@keyframes kompreno-baseline-drift {
+  0%,
+  100% {
+    transform: translate3d(0, -33vh, 0);
+  }
+
+  50% {
+    transform: translate3d(0, 33vh, 0);
+  }
+}
+
+@keyframes kompreno-dither-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-40px, -40px, 0);
+  }
+}
+
+@keyframes kompreno-backdrop-sweep {
+  0%,
+  16% {
+    opacity: 0;
+    transform: translateX(0) rotate(14deg);
+  }
+
+  32% {
+    opacity: 1;
+  }
+
+  58% {
+    opacity: 0.55;
+    transform: translateX(470%) rotate(14deg);
+  }
+
+  70%,
+  100% {
+    opacity: 0;
+    transform: translateX(580%) rotate(14deg);
+  }
+}
+
+[dir='rtl'] .system-backdrop__sweep {
+  animation-name: kompreno-backdrop-sweep-rtl;
+}
+
+@keyframes kompreno-backdrop-sweep-rtl {
+  0%,
+  16% {
+    opacity: 0;
+    transform: translateX(0) rotate(-14deg);
+  }
+
+  32% {
+    opacity: 1;
+  }
+
+  58% {
+    opacity: 0.55;
+    transform: translateX(-470%) rotate(-14deg);
+  }
+
+  70%,
+  100% {
+    opacity: 0;
+    transform: translateX(-580%) rotate(-14deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .system-backdrop__light--cool,
+  .system-backdrop__baseline {
+    display: none;
+  }
+
+  .system-backdrop__rules {
+    animation: none;
+  }
+
+  .system-backdrop__dither {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .system-backdrop__light,
+  .system-backdrop__rules,
+  .system-backdrop__baseline,
+  .system-backdrop__dither,
+  .system-backdrop__sweep {
+    animation: none;
+  }
+
+  .system-backdrop__sweep {
+    display: none;
+  }
 }
 
 /* ==============================================================

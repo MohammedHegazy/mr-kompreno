@@ -35,8 +35,6 @@ useSeoMeta({
 
 <template>
   <div class="page-shell" :dir="dir">
-    <BrandMotionBackground variant="canvas" />
-
     <div class="page-content">
       <AppHeader
         :locale="locale"
