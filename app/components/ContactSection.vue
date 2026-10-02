@@ -29,13 +29,13 @@ const props = defineProps<{ text: Record<string, any>; socialLinks: Array<{ labe
         <div class="contact-list">
           <div class="contact-item">
             <span>{{ props.text.contact.phone }}</span>
-            <strong>{{ props.text.contact.pending }}</strong>
+            <a class="contact-number" href="tel:+963955403020" dir="ltr">+963 955 403 020</a>
           </div>
           <div class="contact-item">
             <span>{{ props.text.contact.whatsapp }}</span>
-            <a class="contact-whatsapp" href="https://wa.me/963955403020" target="_blank" rel="noreferrer">
+            <a class="contact-whatsapp" href="https://wa.me/963955403020" target="_blank" rel="noreferrer" dir="ltr">
               <Icon name="simple-icons:whatsapp" class="contact-whatsapp-icon" aria-hidden="true" />
-              <strong>+963 955 403 020</strong>
+              <bdi>+963 955 403 020</bdi>
             </a>
           </div>
           <div class="contact-item">

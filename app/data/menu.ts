@@ -14,6 +14,7 @@ export interface MenuProduct {
 export interface MenuCategory {
   id: string
   name: Record<Locale, string>
+  icon: string
 }
 
 export const navItems = [
@@ -24,11 +25,11 @@ export const navItems = [
 ] as const
 
 export const menuCategories: MenuCategory[] = [
-  { id: 'all', name: { en: 'All', ar: 'الكل' } },
-  { id: 'loaded-potatoes', name: { en: 'Loaded Potatoes', ar: 'بطاطا محمصة' } },
-  { id: 'pizza', name: { en: 'Pizza', ar: 'بيتزا' } },
-  { id: 'combos', name: { en: 'Combos', ar: 'مجموعات' } },
-  { id: 'sides', name: { en: 'Sides', ar: 'إضافات' } },
+  { id: 'all', name: { en: 'All', ar: 'الكل' }, icon: 'lucide:layout-grid' },
+  { id: 'loaded-potatoes', name: { en: 'Loaded Potatoes', ar: 'بطاطا محمصة' }, icon: 'lucide:flame' },
+  { id: 'pizza', name: { en: 'Pizza', ar: 'بيتزا' }, icon: 'lucide:pizza' },
+  { id: 'combos', name: { en: 'Combos', ar: 'مجموعات' }, icon: 'lucide:users-round' },
+  { id: 'sides', name: { en: 'Sides', ar: 'إضافات' }, icon: 'lucide:utensils-crossed' },
 ]
 
 export const featuredProducts: MenuProduct[] = [

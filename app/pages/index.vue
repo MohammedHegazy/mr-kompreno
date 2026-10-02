@@ -53,6 +53,7 @@ useSeoMeta({
                   :class="{ active: activeCategory === category.id }"
                   @click="activeCategory = category.id"
                 >
+                  <Icon :name="category.icon" class="category-icon" aria-hidden="true" />
                   {{ category.name[locale] }}
                 </button>
               </div>

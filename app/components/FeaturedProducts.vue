@@ -5,7 +5,7 @@ const props = defineProps<{ items: MenuProduct[]; text: Record<string, any>; loc
 </script>
 
 <template>
-  <section class="section">
+  <section class="section featured-products">
     <div class="container">
       <div class="section-head">
         <small>{{ props.text.menu.eyebrow }}</small>
