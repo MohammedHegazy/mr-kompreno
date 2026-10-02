@@ -71,21 +71,22 @@ useSeoMeta({
                 </button>
               </div>
 
-              <div class="product-grid">
-                <article v-for="product in filteredProducts" :key="product.id" class="product-card">
-                  <div class="card-media">
-                    <img :src="product.image" :alt="product.name[locale]" loading="lazy" decoding="async" />
-                  </div>
-                  <div class="card-body">
-                    <h3>{{ product.name[locale] }}</h3>
-                    <p>{{ product.description[locale] }}</p>
-                    <div class="card-meta">
-                      <span class="price-tag">{{ currentText.menu.priceLabel }} {{ product.price }}</span>
-                      <span class="badge">{{ currentText.menu.cta }}</span>
+              <Transition name="product-swap" mode="out-in">
+                <div :key="activeCategory" class="product-grid">
+                  <article v-for="product in filteredProducts" :key="product.id" class="product-card">
+                    <div class="card-media">
+                      <img :src="product.image" :alt="product.name[locale]" loading="lazy" decoding="async" />
                     </div>
-                  </div>
-                </article>
-              </div>
+                    <div class="card-body">
+                      <h3>{{ product.name[locale] }}</h3>
+                      <p>{{ product.description[locale] }}</p>
+                      <div class="card-meta">
+                        <span class="price-tag">{{ currentText.menu.priceLabel }} {{ product.price }}</span>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </Transition>
             </div>
           </div>
         </section>

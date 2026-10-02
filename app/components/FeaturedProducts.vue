@@ -22,7 +22,6 @@ const props = defineProps<{ items: MenuProduct[]; text: Record<string, any>; loc
             <p>{{ item.description[props.locale] }}</p>
             <div class="card-meta">
               <span class="price-tag">{{ props.text.menu.priceLabel }} {{ item.price }}</span>
-              <span class="badge">{{ props.text.menu.cta }}</span>
             </div>
           </div>
         </article>
