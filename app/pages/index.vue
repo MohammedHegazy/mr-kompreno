@@ -11,10 +11,16 @@ const heroTopics = menuCategories.filter((category) => category.id !== 'all')
 
 const heroSpotlight = products.find((product) => product.id === 'p05')!
 
-const railItems = computed(() => navItems.map((item) => ({
-  id: item.id,
-  label: locale.value === 'ar' ? item.ar : item.en,
-})))
+// Rail ticks follow the visual page order so their numbers match the section heads.
+const railOrder = ['home', 'about', 'menu', 'contact'] as const
+
+const railItems = computed(() => railOrder
+  .map((id) => navItems.find((item) => item.id === id))
+  .filter((item) => Boolean(item))
+  .map((item) => ({
+    id: item!.id,
+    label: locale.value === 'ar' ? item!.ar : item!.en,
+  })))
 
 const filteredProducts = computed(() => {
   if (activeCategory.value === 'all') return products

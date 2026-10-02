@@ -140,6 +140,13 @@ const reveal: Directive<HTMLElement, RevealOptions | undefined> = {
       return
     }
 
+    // Arming can happen before the first mount when the loader is skipped, so
+    // late arrivals join the observer instead of an already drained queue.
+    if (armed) {
+      watch(element)
+      return
+    }
+
     queued.add(element)
   },
   unmounted(element) {
