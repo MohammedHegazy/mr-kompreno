@@ -32,6 +32,13 @@ const props = defineProps<{ text: Record<string, any>; socialLinks: Array<{ labe
             <strong>{{ props.text.contact.pending }}</strong>
           </div>
           <div class="contact-item">
+            <span>{{ props.text.contact.whatsapp }}</span>
+            <a class="contact-whatsapp" href="https://wa.me/963955403020" target="_blank" rel="noreferrer">
+              <Icon name="simple-icons:whatsapp" class="contact-whatsapp-icon" aria-hidden="true" />
+              <strong>+963 955 403 020</strong>
+            </a>
+          </div>
+          <div class="contact-item">
             <span>{{ props.text.contact.instagram }}</span>
             <strong>@mrkompreno</strong>
           </div>

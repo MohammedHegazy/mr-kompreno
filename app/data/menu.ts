@@ -180,6 +180,7 @@ export const textContent = {
       eyebrow: 'Visit & connect',
       title: 'Find your next favorite bite.',
       phone: 'Phone',
+      whatsapp: 'WhatsApp',
       instagram: 'Instagram',
       facebook: 'Facebook',
       website: 'Website',
@@ -222,6 +223,7 @@ export const textContent = {
       eyebrow: 'تواصل معنا',
       title: 'اعثر على القطعة المفضلة التالية.',
       phone: 'الهاتف',
+      whatsapp: 'واتساب',
       instagram: 'إنستغرام',
       facebook: 'فيسبوك',
       website: 'الموقع',
@@ -239,5 +241,6 @@ export const textContent = {
 export const socialLinks = [
   { label: 'Instagram', href: 'https://www.instagram.com/mrkompreno/', icon: 'simple-icons:instagram' },
   { label: 'Facebook', href: 'https://www.facebook.com/KOMPRENO.MR', icon: 'simple-icons:facebook' },
+  { label: 'WhatsApp', href: 'https://wa.me/963955403020', icon: 'simple-icons:whatsapp' },
   { label: 'Website', href: 'https://mr-kompreno.com/', icon: 'lucide:globe' },
 ]

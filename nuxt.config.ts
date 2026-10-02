@@ -10,6 +10,7 @@ export default defineNuxtConfig({
       icons: [
         'simple-icons:instagram',
         'simple-icons:facebook',
+        'simple-icons:whatsapp',
         'lucide:globe',
       ],
     },

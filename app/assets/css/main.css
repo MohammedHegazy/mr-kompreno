@@ -388,9 +388,9 @@ button {
 }
 
 .brand-motion--canvas {
-  --motion-line: rgba(215, 25, 32, 0.12);
-  --motion-shade: rgba(245, 211, 58, 0.2);
-  --motion-glint: rgba(215, 25, 32, 0.16);
+  --motion-line: rgba(215, 25, 32, 0.15);
+  --motion-shade: rgba(245, 211, 58, 0.28);
+  --motion-glint: rgba(215, 25, 32, 0.2);
 }
 
 .brand-motion__pattern {
@@ -404,10 +404,10 @@ button {
 }
 
 .brand-motion--canvas .brand-motion__pattern {
-  opacity: 0.78;
+  opacity: 0.9;
   background-image:
-    repeating-linear-gradient(132deg, transparent 0 68px, rgba(215, 25, 32, 0.1) 69px 71px, transparent 72px 138px),
-    repeating-linear-gradient(42deg, transparent 0 22px, rgba(245, 211, 58, 0.2) 23px 25px, transparent 26px 48px);
+    repeating-linear-gradient(132deg, transparent 0 68px, rgba(215, 25, 32, 0.14) 69px 72px, transparent 73px 138px),
+    repeating-linear-gradient(42deg, transparent 0 22px, rgba(245, 211, 58, 0.24) 23px 27px, transparent 28px 48px);
   background-size: 360px 320px, 180px 180px;
   animation-name: kompreno-canvas-drift;
 }
@@ -420,8 +420,8 @@ button {
 }
 
 .brand-motion--canvas .brand-motion__etching {
-  opacity: 0.55;
-  background-image: repeating-linear-gradient(0deg, transparent 0 78px, rgba(215, 25, 32, 0.035) 79px, transparent 80px 156px);
+  opacity: 0.7;
+  background-image: repeating-linear-gradient(0deg, transparent 0 78px, rgba(215, 25, 32, 0.05) 79px, transparent 80px 156px);
 }
 
 .brand-motion__sweep {
@@ -444,11 +444,13 @@ button {
 }
 
 .brand-motion--canvas .brand-motion__sweep--one {
-  background: linear-gradient(90deg, transparent, rgba(245, 211, 58, 0.28) 44%, rgba(215, 25, 32, 0.1) 58%, transparent);
+  width: 25%;
+  background: linear-gradient(90deg, transparent, rgba(245, 211, 58, 0.36) 44%, rgba(215, 25, 32, 0.16) 58%, transparent);
 }
 
 .brand-motion--canvas .brand-motion__sweep--two {
-  background: linear-gradient(90deg, transparent, rgba(215, 25, 32, 0.2) 44%, rgba(200, 75, 42, 0.12) 58%, transparent);
+  width: 25%;
+  background: linear-gradient(90deg, transparent, rgba(215, 25, 32, 0.3) 44%, rgba(200, 75, 42, 0.18) 58%, transparent);
 }
 
 @keyframes kompreno-pattern-drift {
@@ -617,34 +619,115 @@ button {
 .product-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
+  column-gap: 24px;
+  row-gap: 32px;
 }
 
 .card {
-  background: var(--kompreno-white);
+  position: relative;
+  isolation: isolate;
+  min-height: 260px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.62));
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-soft);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.94), 0 18px 38px rgba(42, 28, 24, 0.1);
+  overflow: visible;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  backdrop-filter: blur(14px) saturate(130%);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card::before,
+.product-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--kompreno-card-edge-angle),
+    rgba(215, 25, 32, 0.28),
+    rgba(245, 211, 58, 0.95) 52deg,
+    rgba(215, 25, 32, 0.9) 96deg,
+    rgba(215, 25, 32, 0.18) 145deg,
+    rgba(255, 255, 255, 0.9) 180deg,
+    rgba(215, 25, 32, 0.18) 218deg,
+    rgba(245, 211, 58, 0.95) 278deg,
+    rgba(215, 25, 32, 0.9) 322deg,
+    rgba(215, 25, 32, 0.28)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: kompreno-card-edge-rotate 8s linear infinite;
+}
+
+@property --kompreno-card-edge-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes kompreno-card-edge-rotate {
+  to { --kompreno-card-edge-angle: 360deg; }
+}
+
+.card-media {
+  position: absolute;
+  top: -20px;
+  inset-inline-end: -14px;
+  z-index: 3;
+  width: 48%;
+  height: 66%;
   overflow: hidden;
-  border: 1px solid rgba(42, 28, 24, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 18px;
+  background: var(--kompreno-canvas);
+  box-shadow: 0 10px 24px rgba(42, 28, 24, 0.12);
+}
+
+.card-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(125deg, rgba(215, 25, 32, 0.2), transparent 48%, rgba(245, 211, 58, 0.28));
+  transition: opacity 0.35s ease;
 }
 
 .card-media img {
+  position: relative;
+  z-index: 0;
   width: 100%;
-  height: 240px;
+  height: 100%;
   object-fit: cover;
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .card-body {
-  padding: 18px 18px 22px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 260px;
+  padding: 24px 20px;
 }
 
 .card-body h3 {
+  max-width: 48%;
   margin: 0 0 8px;
   font-size: 1.3rem;
 }
 
 .card-body p {
-  margin: 0 0 16px;
+  max-width: 48%;
+  margin: 0 0 6px;
   color: rgba(42, 28, 24, 0.72);
   line-height: 1.7;
 }
@@ -653,17 +736,28 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-top: auto;
   gap: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .price-tag {
+  display: inline-flex;
+  align-items: center;
   font-weight: 900;
   color: var(--kompreno-red);
   font-size: 1.1rem;
+  padding: 7px 10px;
+  border: 1px solid rgba(215, 25, 32, 0.12);
+  border-radius: 10px;
+  background: rgba(215, 25, 32, 0.07);
 }
 
 .badge {
-  background: rgba(245, 211, 58, 0.15);
+  background: var(--kompreno-yellow);
   color: var(--kompreno-charcoal);
   border-radius: 999px;
   padding: 8px 10px;
@@ -703,9 +797,11 @@ button {
 }
 
 .menu-shell {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.16);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  backdrop-filter: blur(8px) saturate(120%);
   border-radius: 28px;
-  border: 1px solid rgba(42, 28, 24, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.62);
   padding: 22px;
 }
 
@@ -737,20 +833,53 @@ button {
 }
 
 .product-card {
-  background: #fff;
+  position: relative;
+  isolation: isolate;
+  min-height: 260px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.62));
   border-radius: 24px;
-  border: 1px solid rgba(42, 28, 24, 0.08);
-  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.86);
+  overflow: visible;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.96), 0 12px 30px rgba(42, 28, 24, 0.09);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  backdrop-filter: blur(14px) saturate(130%);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-.product-card img {
+.product-card .card-media img {
   width: 100%;
-  height: 220px;
+  height: 100%;
   object-fit: cover;
 }
 
 .product-card .card-body {
-  padding: 16px 16px 18px;
+  padding: 24px 20px;
+}
+
+@media (hover: hover) {
+  .card:hover,
+  .product-card:hover {
+    z-index: 4;
+    transform: translateY(-6px);
+    border-color: rgba(215, 25, 32, 0.3);
+    box-shadow: 0 22px 38px rgba(215, 25, 32, 0.13), 0 8px 18px rgba(42, 28, 24, 0.1);
+  }
+
+  .card:hover::before,
+  .product-card:hover::before {
+    animation-duration: 3.2s;
+    filter: brightness(1.12);
+  }
+
+  .card:hover .card-media img,
+  .product-card:hover .card-media img {
+    transform: scale(1.055);
+  }
+
+  .card:hover .card-media::after,
+  .product-card:hover .card-media::after {
+    opacity: 0.8;
+  }
 }
 
 .contact-panel {
@@ -774,6 +903,10 @@ button {
 .contact-panel p {
   color: rgba(255, 255, 255, 0.8);
   line-height: 1.8;
+}
+
+.contact-panel .section-head h2 {
+  color: var(--kompreno-yellow);
 }
 
 .social-links {
@@ -818,6 +951,20 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 16px;
   color: var(--kompreno-white);
+}
+
+.contact-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--kompreno-yellow);
+  white-space: nowrap;
+}
+
+.contact-whatsapp-icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
 }
 
 .footer {
@@ -943,6 +1090,30 @@ button {
     padding-inline: 11px;
   }
 
+  .card,
+  .product-card,
+  .card-body,
+  .product-card .card-body {
+    min-height: 300px;
+  }
+
+  .card-media {
+    top: -18px;
+    inset-inline-end: -12px;
+    width: 46%;
+    height: 150px;
+  }
+
+  .card-body,
+  .product-card .card-body {
+    padding: 18px 18px 20px;
+  }
+
+  .card-body h3,
+  .card-body p {
+    max-width: 48%;
+  }
+
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -967,5 +1138,19 @@ button {
 
   .brand-motion__sweep {
     display: none;
+  }
+
+  .card::before,
+  .product-card::before {
+    animation: none;
+  }
+
+  .card,
+  .product-card,
+  .card-media img,
+  .card-media::after,
+  .card::before,
+  .product-card::before {
+    transition-duration: 0.01ms;
   }
 }
