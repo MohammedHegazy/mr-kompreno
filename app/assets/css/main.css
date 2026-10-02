@@ -62,7 +62,6 @@ button {
   top: 0;
   z-index: 40;
   padding: 12px 0;
-  transition: padding 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .header-inner {
@@ -80,7 +79,7 @@ button {
   border-radius: 20px;
   background: var(--kompreno-red);
   box-shadow: 0 12px 28px rgba(42, 28, 24, 0.16);
-  transition: width 0.32s cubic-bezier(0.22, 1, 0.36, 1), min-height 0.32s cubic-bezier(0.22, 1, 0.36, 1), padding 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .header-inner > :not(.brand-motion) {
@@ -88,13 +87,8 @@ button {
   z-index: 1;
 }
 
-.site-header.is-scrolled {
-  padding: 8px 0;
-}
-
 .site-header.is-scrolled .header-inner {
   width: min(1016px, calc(100% - 32px));
-  min-height: 56px;
 }
 
 .brand-mark {
@@ -108,13 +102,11 @@ button {
   height: 50px;
   object-fit: contain;
   flex: 0 0 50px;
-  transition: width 0.32s cubic-bezier(0.22, 1, 0.36, 1), height 0.32s cubic-bezier(0.22, 1, 0.36, 1), flex-basis 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .site-header.is-scrolled .brand-mark img {
-  width: 42px;
-  height: 42px;
-  flex-basis: 42px;
+  transform: scale(0.84);
 }
 
 .brand-name {
@@ -896,18 +888,6 @@ button {
 
   .header-inner {
     gap: 8px;
-  }
-
-  .site-header {
-    padding: 8px 0;
-  }
-
-  .site-header.is-scrolled {
-    padding: 6px 0;
-  }
-
-  .site-header.is-scrolled .header-inner {
-    min-height: 62px;
   }
 
   .language-switch {

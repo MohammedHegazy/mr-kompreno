@@ -39,7 +39,10 @@ const toggleMenu = () => {
 }
 
 const updateScrollState = () => {
-  isScrolled.value = window.scrollY > 24
+  const scrollY = window.scrollY
+
+  if (!isScrolled.value && scrollY > 48) isScrolled.value = true
+  else if (isScrolled.value && scrollY < 16) isScrolled.value = false
 }
 
 const handleKeydown = (event: KeyboardEvent) => {
