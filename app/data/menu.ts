@@ -17,6 +17,14 @@ export interface MenuCategory {
   icon: string
 }
 
+export interface ContactChannel {
+  key: 'phone' | 'whatsapp' | 'instagram' | 'facebook'
+  value: string
+  href: string
+  icon: string
+  external: boolean
+}
+
 export const navItems = [
   { id: 'home', en: 'Home', ar: 'الرئيسية' },
   { id: 'menu', en: 'Menu', ar: 'القائمة' },
@@ -186,6 +194,12 @@ export const textContent = {
       pending: 'To be confirmed',
     },
     footer: {
+      eyebrow: 'Digital menu',
+      navigate: 'Navigate',
+      signature: 'Signature picks',
+      connect: 'Reach us',
+      follow: 'Follow',
+      backToTop: 'Back to top',
       designed: 'Digital experience by',
       provider: 'Our Studio',
       rights: 'All rights reserved',
@@ -228,6 +242,12 @@ export const textContent = {
       pending: 'سيتم التأكيد لاحقًا',
     },
     footer: {
+      eyebrow: 'القائمة الرقمية',
+      navigate: 'تصفح',
+      signature: 'أفضل ما نقدمه',
+      connect: 'قنوات التواصل',
+      follow: 'تابعنا',
+      backToTop: 'العودة للأعلى',
       designed: 'تجربة رقمية من',
       provider: 'استوديونا',
       rights: 'جميع الحقوق محفوظة',
@@ -239,4 +259,12 @@ export const socialLinks = [
   { label: 'Instagram', href: 'https://www.instagram.com/mrkompreno/', icon: 'simple-icons:instagram' },
   { label: 'Facebook', href: 'https://www.facebook.com/KOMPRENO.MR', icon: 'simple-icons:facebook' },
   { label: 'WhatsApp', href: 'https://wa.me/963955403020', icon: 'simple-icons:whatsapp' },
+]
+
+// Phone and WhatsApp intentionally share one number, so both live in one record.
+export const contactChannels: ContactChannel[] = [
+  { key: 'phone', value: '+963 955 403 020', href: 'tel:+963955403020', icon: 'lucide:phone', external: false },
+  { key: 'whatsapp', value: '+963 955 403 020', href: 'https://wa.me/963955403020', icon: 'simple-icons:whatsapp', external: true },
+  { key: 'instagram', value: '@mrkompreno', href: 'https://www.instagram.com/mrkompreno/', icon: 'simple-icons:instagram', external: true },
+  { key: 'facebook', value: 'KOMPRENO.MR', href: 'https://www.facebook.com/KOMPRENO.MR', icon: 'simple-icons:facebook', external: true },
 ]

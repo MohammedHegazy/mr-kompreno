@@ -1,42 +1,13 @@
 <script setup lang="ts">
 import BrandMotionBackground from './BrandMotionBackground.vue'
+import { contactChannels } from '~/data/menu'
 
 const props = defineProps<{ text: Record<string, any>; socialLinks: Array<{ label: string; href: string; icon: string }> }>()
 
-const channels = computed(() => [
-  {
-    key: 'phone',
-    label: props.text.contact.phone,
-    value: '+963 955 403 020',
-    href: 'tel:+963955403020',
-    icon: 'lucide:phone',
-    external: false,
-  },
-  {
-    key: 'whatsapp',
-    label: props.text.contact.whatsapp,
-    value: '+963 955 403 020',
-    href: 'https://wa.me/963955403020',
-    icon: 'simple-icons:whatsapp',
-    external: true,
-  },
-  {
-    key: 'instagram',
-    label: props.text.contact.instagram,
-    value: '@mrkompreno',
-    href: 'https://www.instagram.com/mrkompreno/',
-    icon: 'simple-icons:instagram',
-    external: true,
-  },
-  {
-    key: 'facebook',
-    label: props.text.contact.facebook,
-    value: 'KOMPRENO.MR',
-    href: 'https://www.facebook.com/KOMPRENO.MR',
-    icon: 'simple-icons:facebook',
-    external: true,
-  },
-])
+const channels = computed(() => contactChannels.map((channel) => ({
+  ...channel,
+  label: props.text.contact[channel.key],
+})))
 </script>
 
 <template>

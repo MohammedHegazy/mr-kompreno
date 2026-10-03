@@ -118,7 +118,12 @@ useSeoMeta({
         <ContactSection :text="currentText" :social-links="socialLinks" />
       </main>
 
-      <AppFooter :text="currentText" />
+      <AppFooter
+        :text="currentText"
+        :social-links="socialLinks"
+        :locale="locale"
+        @switch-locale="switchLocale"
+      />
     </div>
   </div>
 </template>
