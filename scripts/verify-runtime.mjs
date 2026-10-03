@@ -429,6 +429,59 @@ const runViewport = async (viewport, { killObserver }) => {
   report('every visible card image is actually painted', painted.length, (n) => n === 0)
   if (painted.length) console.log(`        covered by: ${JSON.stringify(painted.slice(0, 3))}`)
 
+  // A broken image still occupies its box and still wins the hit test, so
+  // painting proves nothing about loading. `naturalWidth` is the only signal
+  // that distinguishes a decoded photograph from a 404 that kept its layout:
+  // that is exactly how a `srcset` advertising a derivative the generator never
+  // wrote went unnoticed on every screen that wanted that rung.
+  const decoded = await evaluate(sessionId, `(() => {
+    const broken = []
+    let checked = 0
+
+    for (const img of document.querySelectorAll('.card-media img')) {
+      if (!img.complete) continue
+
+      checked += 1
+
+      if (img.naturalWidth === 0) {
+        broken.push({ src: img.currentSrc || img.src, alt: img.alt })
+      }
+    }
+
+    return { checked, broken }
+  })()`)
+
+  report('card images checked for decoding', decoded.checked, (n) => n > 0)
+  report('no card image failed to decode', decoded.broken.length, (n) => n === 0)
+  if (decoded.broken.length) console.log(`        broken: ${JSON.stringify(decoded.broken.slice(0, 3))}`)
+
+  // Every rung the browser was offered has to exist, at every width the layout
+  // can ask for. A missing candidate is a 404 that only shows up on the
+  // devices dense enough to select it.
+  const rungs = await evaluate(sessionId, `(() => {
+    const missing = []
+
+    for (const img of document.querySelectorAll('.card-media img')) {
+      const parsed = img.srcset || img.querySelector('source')?.srcset || ''
+      for (const candidate of parsed.split(',')) {
+        const url = candidate.trim().split(/\\s+/)[0]
+        if (url) missing.push(url)
+      }
+    }
+
+    return [...new Set(missing)]
+  })()`)
+
+  const absent = []
+  for (const url of rungs) {
+    const status = await evaluate(sessionId, `fetch(${JSON.stringify(url)}, { method: 'HEAD' }).then((r) => r.status).catch(() => 0)`)
+    if (status !== 200) absent.push(`${url} -> ${status}`)
+  }
+
+  report('every advertised derivative exists', absent.length, (n) => n === 0)
+  if (absent.length) console.log(`        absent: ${JSON.stringify(absent.slice(0, 5))}`)
+  console.log(`  INFO  ${rungs.length} candidate(s) offered, all reachable`)
+
   console.log(`  INFO  ${board.cards} cards, images ${JSON.stringify(board.mediaSizes)}, card heights ${JSON.stringify(board.cardHeights)}`)
 
   if (board.mediaSizes.length > 1 || board.cardHeights.length > 1) {

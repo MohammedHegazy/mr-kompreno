@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import derivatives from '~/generated/derivatives.json'
+
 type SkeletonState = 'loading' | 'loaded' | 'failed'
 
 const props = defineProps<{
@@ -11,11 +13,7 @@ const props = defineProps<{
   priority?: boolean
 }>()
 
-/**
- * Widths the derivative generator writes, in the order they are offered to the
- * browser. Kept in step with scripts/generate-images.mjs.
- */
-const DERIVATIVE_WIDTHS = [480, 768, 1200]
+const widths = derivatives as Record<string, number[]>
 
 /** Product photography has derivatives; the logo plates are already tiny. */
 const DERIVATABLE = /^\/items\/.+\.(jpe?g|png)$/i
@@ -24,15 +22,24 @@ const image = ref<HTMLImageElement | null>(null)
 const state = ref<SkeletonState>('loading')
 
 /**
- * A `srcset` of the generated derivatives, or nothing at all for assets that
- * have none. Without this a phone rendered a 350px card by downloading the
- * 1200px original, which is the single largest avoidable cost on the page.
+ * A `srcset` of the derivatives that were actually written for this source, or
+ * nothing at all for assets that have none. Without this a phone rendered a
+ * 350px card by downloading the 1200px original, which is the single largest
+ * avoidable cost on the page.
+ *
+ * The widths come from the generator's manifest rather than from a list written
+ * out here. The two drifting apart is not theoretical: the generator refuses to
+ * upscale, so the one 840px-wide portrait got 480/768/840 and no 1200, while this
+ * component still offered a 1200w candidate. Every screen dense enough to want
+ * that rung requested it, got a 404, and showed nothing.
  */
 const sources = computed(() => {
-  if (!DERIVATABLE.test(props.src)) return []
+  const available = widths[props.src]
+
+  if (!DERIVATABLE.test(props.src) || !available?.length) return []
 
   const stem = props.src.replace(/\.(jpe?g|png)$/i, '')
-  const build = (extension: string) => DERIVATIVE_WIDTHS
+  const build = (extension: string) => available
     .map((width) => `/items/responsive/${stem.split('/').pop()}-${width}.${extension} ${width}w`)
     .join(', ')
 

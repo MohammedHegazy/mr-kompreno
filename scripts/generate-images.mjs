@@ -10,13 +10,20 @@
  *   - WebP at 480, 768 and 1200 wide (the format the page requests)
  *   - a re-encoded JPEG fallback at the same widths, for the `jpeg` <source>
  *
+ * A source narrower than the ladder gets no upscaled rung, so the widths it
+ * actually produced are recorded in app/generated/derivatives.json and the
+ * component offers exactly those. Advertising a rung that was never written is
+ * not a cosmetic mistake: the browser picks the candidate that satisfies its
+ * device pixel ratio, requests it, and gets a 404, so the image does not load
+ * at all on any screen dense enough to want that rung.
+ *
  * Originals are left untouched: they are the source of record and the plan
  * calls for derivatives alongside them, not replacements.
  *
  * Run with `npm run images`. Output is skipped when the file already exists at
  * the right size, so it is safe to run in a loop.
  */
-import { mkdir, readdir, stat } from 'node:fs/promises'
+import { mkdir, readdir, stat, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
@@ -24,6 +31,7 @@ import sharp from 'sharp'
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const SOURCE_DIR = join(root, 'public', 'items')
 const OUTPUT_DIR = join(root, 'public', 'items', 'responsive')
+const MANIFEST = join(root, 'app', 'generated', 'derivatives.json')
 
 /** Widths a card can actually be at, so nothing is generated that is never used. */
 const WIDTHS = [480, 768, 1200]
@@ -45,17 +53,24 @@ await mkdir(OUTPUT_DIR, { recursive: true })
 let written = 0
 let skipped = 0
 
+/** Source path -> the widths actually on disk for it, ascending. */
+const manifest = {}
+
 for (const file of sources) {
   const input = join(SOURCE_DIR, file)
   const stem = file.replace(/\.(jpe?g|png)$/i, '')
   const image = sharp(input)
   const { width: sourceWidth, height: sourceHeight } = await image.metadata()
 
+  const produced = new Set()
+
   for (const width of WIDTHS) {
     // Never upscale. A 840px-wide portrait source cannot fill a 1200px slot, and
     // an upscaled derivative is larger and blurrier than the original.
     const target = Math.min(width, sourceWidth)
     const height = Math.round((sourceHeight / sourceWidth) * target)
+
+    produced.add(target)
 
     const jobs = [
       {
@@ -83,7 +98,13 @@ for (const file of sources) {
     }
   }
 
-  console.log(`${file} (${sourceWidth}x${sourceHeight})`)
+  manifest[`/items/${file}`] = [...produced].sort((a, b) => a - b)
+
+  console.log(`${file} (${sourceWidth}x${sourceHeight}) -> ${manifest[`/items/${file}`].join(', ')}`)
 }
 
+await mkdir(join(root, 'app', 'generated'), { recursive: true })
+await writeFile(MANIFEST, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
+
 console.log(`\n${written} file(s) written, ${skipped} already present -> public/items/responsive`)
+console.log(`${Object.keys(manifest).length} source(s) recorded -> app/generated/derivatives.json`)
