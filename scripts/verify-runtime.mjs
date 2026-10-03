@@ -436,6 +436,7 @@ const runViewport = async (viewport, { killObserver }) => {
   // wrote went unnoticed on every screen that wanted that rung.
   const decoded = await evaluate(sessionId, `(() => {
     const broken = []
+    const chosen = new Set()
     let checked = 0
 
     for (const img of document.querySelectorAll('.card-media img')) {
@@ -443,17 +444,24 @@ const runViewport = async (viewport, { killObserver }) => {
 
       checked += 1
 
+      // currentSrc is the file the browser actually settled on. naturalWidth is
+      // not: it comes back density-corrected against \`sizes\`, so it reports the
+      // layout width and says nothing about which derivative was fetched.
+      const file = (img.currentSrc || img.src).split('/').pop()
+      chosen.add(file)
+
       if (img.naturalWidth === 0) {
         broken.push({ src: img.currentSrc || img.src, alt: img.alt })
       }
     }
 
-    return { checked, broken }
+    return { checked, broken, chosen: [...chosen].sort() }
   })()`)
 
   report('card images checked for decoding', decoded.checked, (n) => n > 0)
   report('no card image failed to decode', decoded.broken.length, (n) => n === 0)
   if (decoded.broken.length) console.log(`        broken: ${JSON.stringify(decoded.broken.slice(0, 3))}`)
+  console.log(`  INFO  derivatives fetched: ${JSON.stringify(decoded.chosen)}`)
 
   // Every rung the browser was offered has to exist, at every width the layout
   // can ask for. A missing candidate is a 404 that only shows up on the
