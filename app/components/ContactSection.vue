@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import BrandMotionBackground from './BrandMotionBackground.vue'
 import { contactChannels } from '~/data/menu'
 
 const props = defineProps<{ text: Record<string, any>; socialLinks: Array<{ label: string; href: string; icon: string }> }>()
@@ -14,8 +13,6 @@ const channels = computed(() => contactChannels.map((channel) => ({
   <section id="contact" class="section">
     <div class="container">
       <div class="contact-panel" v-reveal="{ from: 'up', distance: 58, duration: 1200, ease: 'soft' }">
-        <BrandMotionBackground variant="ember" />
-
         <div>
           <SectionHead
             :eyebrow="props.text.contact.eyebrow"

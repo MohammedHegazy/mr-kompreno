@@ -1,4 +1,5 @@
 import type { Directive } from 'vue'
+import { observeLiveness, releaseLiveness } from '~/utils/liveness.client'
 
 export type RevealOrigin = 'up' | 'down' | 'start' | 'end' | 'scale' | 'blur' | 'curtain'
 
@@ -20,6 +21,20 @@ export interface RevealOptions {
 const READY_EVENT = 'kompreno:ready'
 const ARM_FALLBACK = 8000
 
+/**
+ * How long an element may sit in view without being reported before it is
+ * opened by hand. An IntersectionObserver with a negative bottom margin can
+ * legally drop a callback — a scroller that never settles, a tab restored from
+ * bfcache mid-frame, a category swap that remounts a node already past the
+ * trigger line. Nothing in the spec promises a callback. The bug this replaces
+ * hid product photography permanently at every viewport, and a deadline cannot
+ * do that.
+ */
+const ELEMENT_BACKSTOP = 2600
+
+/** One rAF-throttled sweep covers everything the observer fails to report. */
+const SWEEP_INTERVAL = 120
+
 const DEFAULTS: Required<RevealOptions> = {
   from: 'up',
   distance: 32,
@@ -36,42 +51,91 @@ const EASES: Record<NonNullable<RevealOptions['ease']>, string> = {
   snap: 'var(--reveal-ease-snap)',
 }
 
+/**
+ * Content that disappears rather than merely sits offset. A curtain reveal
+ * clips itself; a card's own reveal origin is a transform, but the `.card-media`
+ * inside it is clipped independently, so both shapes have to be caught.
+ */
+const CLIPPED_SELECTOR = '[data-reveal="curtain"], .card-media'
+
 let observer: IntersectionObserver | null = null
-let liveness: IntersectionObserver | null = null
 let armed = false
 let settled = false
 const queued = new Set<HTMLElement>()
 
-/** Elements whose decorative loops must not burn frames while off screen. */
-const LIVE_SELECTOR = '.card, .brand-motion'
+/** Elements the observer has not reported into view yet. */
+const pending = new Set<HTMLElement>()
+let sweepFrame = 0
+
+/**
+ * Ambient loops repaint on every frame, so they only run while near the
+ * viewport. Cards are gone from this list: their motion layer was static CSS,
+ * so there is nothing left to pause and everything left to animate.
+ */
+const LIVE_SELECTOR = '.brand-motion'
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-/**
- * Ambient loops (rotating card edges, drifting backdrops) repaint on every
- * frame, so they only run while the element is near the viewport or hovered.
- */
-const observeLive = (element: HTMLElement) => {
-  element.setAttribute('data-liveness', '')
-
-  if (!liveness) {
-    liveness = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          ;(entry.target as HTMLElement).classList.toggle('is-live', entry.isIntersecting)
-        }
-      },
-      { rootMargin: '160px 0px 160px 0px', threshold: 0 },
-    )
-  }
-
-  liveness.observe(element)
+/** True when the element is actually on screen, by geometry rather than by callback. */
+const onScreen = (element: HTMLElement) => {
+  const rect = element.getBoundingClientRect()
+  return rect.top < window.innerHeight && rect.bottom > 0
 }
 
 const show = (element: HTMLElement) => {
-  element.classList.add('is-inview')
+  element.classList.add('is-inview', 'is-revealing')
   observer?.unobserve(element)
+  pending.delete(element)
+  window.clearTimeout(Number(element.dataset.revealTimer ?? 0))
+  delete element.dataset.revealTimer
+
+  // Promote only for the length of the transition. A permanent `will-change`
+  // on a few hundred elements is a few hundred extra compositor layers held
+  // for the life of the session.
+  const duration = Number(element.style.getPropertyValue('--reveal-duration').replace('ms', '')) || 900
+  window.setTimeout(() => element.classList.remove('is-revealing'), duration + 120)
+
   queued.delete(element)
+}
+
+/**
+ * Opens an element the observer never reported.
+ *
+ * The clipped shapes are flagged so the stylesheet resolves them with no
+ * transition: animating something that is already on screen reads as a glitch,
+ * and a clipped photograph is the difference between a card and a hole in the
+ * page.
+ */
+const open = (element: HTMLElement) => {
+  if (element.matches(CLIPPED_SELECTOR) || element.querySelector(CLIPPED_SELECTOR)) {
+    element.setAttribute('data-reveal-stranded', '')
+  }
+
+  show(element)
+}
+
+/**
+ * Geometry sweep, run on scroll and resize.
+ *
+ * A deadline alone is not enough, and was actively harmful when used as one: it
+ * fired for every element below the fold, which meant content the reader had
+ * not reached yet was already resolved and popped in without animating when
+ * they got there. So the deadline only opens an element that is genuinely in
+ * view, and this sweep covers the case where the page never scrolls again and
+ * the initial deadline has already lapsed.
+ */
+const sweep = () => {
+  sweepFrame = 0
+
+  for (const element of [...pending]) {
+    if (!onScreen(element)) continue
+    open(element)
+  }
+}
+
+const scheduleSweep = () => {
+  if (sweepFrame) return
+  sweepFrame = window.requestAnimationFrame(sweep)
 }
 
 const watch = (element: HTMLElement) => {
@@ -88,6 +152,25 @@ const watch = (element: HTMLElement) => {
   }
 
   observer.observe(element)
+  pending.add(element)
+
+  if (element.dataset.revealTimer) return
+
+  const delay = Number(element.style.getPropertyValue('--reveal-delay').replace('ms', '')) || 0
+
+  element.dataset.revealTimer = String(window.setTimeout(() => {
+    delete element.dataset.revealTimer
+
+    if (element.classList.contains('is-inview')) return
+
+    // Still below the fold: not missed, just not reached. Leave it pending so
+    // the sweep opens it with its animation intact when the reader gets there.
+    if (!onScreen(element)) return
+
+    open(element)
+  }, delay + ELEMENT_BACKSTOP))
+
+  scheduleSweep()
 }
 
 /**
@@ -100,7 +183,7 @@ const arm = () => {
 
   document.documentElement.classList.add('reveal-ready')
 
-  for (const element of document.querySelectorAll<HTMLElement>(LIVE_SELECTOR)) observeLive(element)
+  for (const element of document.querySelectorAll<HTMLElement>(LIVE_SELECTOR)) observeLiveness(element)
 
   if (prefersReducedMotion()) {
     queued.forEach(show)
@@ -151,7 +234,7 @@ const configure = (element: HTMLElement, options: RevealOptions) => {
   element.setAttribute('data-reveal', settings.from)
   element.classList.add('reveal')
 
-  if (element.matches(LIVE_SELECTOR)) observeLive(element)
+  if (element.matches(LIVE_SELECTOR)) observeLiveness(element)
 }
 
 const reveal: Directive<HTMLElement, RevealOptions | undefined> = {
@@ -180,8 +263,11 @@ const reveal: Directive<HTMLElement, RevealOptions | undefined> = {
   },
   unmounted(element) {
     queued.delete(element)
+    pending.delete(element)
     observer?.unobserve(element)
-    liveness?.unobserve(element)
+    releaseLiveness(element)
+    window.clearTimeout(Number(element.dataset.revealTimer ?? 0))
+    delete element.dataset.revealTimer
   },
 }
 
@@ -189,6 +275,12 @@ export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.directive('reveal', reveal)
 
   if (!import.meta.client) return
+
+  // The sweep is the safety net the observer cannot be. Both are passive and
+  // rAF-throttled, so a scroll costs one style read per pending element rather
+  // than a layout pass per reveal.
+  window.addEventListener('scroll', scheduleSweep, { passive: true })
+  window.addEventListener('resize', scheduleSweep, { passive: true })
 
   // Keyboard users never scroll, so focus is treated as a reveal trigger.
   document.addEventListener('focusin', (event) => {

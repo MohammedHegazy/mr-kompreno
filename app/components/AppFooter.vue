@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import BrandMotionBackground from './BrandMotionBackground.vue'
 import { contactChannels, featuredProducts, navItems } from '~/data/menu'
 import type { Locale } from '~/data/menu'
 
@@ -49,8 +48,6 @@ const switchLocale = () => {
 
 <template>
   <footer class="footer">
-    <BrandMotionBackground variant="ember" />
-
     <div class="container footer-lede">
       <a
         href="#home"

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import BrandMotionBackground from './BrandMotionBackground.vue'
 import { contactChannels, featuredProducts, menuCategories } from '~/data/menu'
 import type { Locale } from '~/data/menu'
 
@@ -11,9 +10,13 @@ const props = defineProps<{
   locale: Locale
 }>()
 
-const emit = defineEmits<{ (e: 'switch-locale', value: Locale): void }>()
+const emit = defineEmits<{
+  (e: 'switch-locale', value: Locale): void
+  (e: 'select-category', value: string): void
+}>()
 
 const isMenuOpen = ref(false)
+const isPanelOpen = ref(false)
 const menuToggle = ref<HTMLButtonElement | null>(null)
 const mobileMenu = ref<HTMLElement | null>(null)
 const closeButton = ref<HTMLButtonElement | null>(null)
@@ -56,10 +59,25 @@ const openMenu = () => {
   nextTick(() => closeButton.value?.focus())
 }
 
-const closeMenu = (restoreFocus = true) => {
+// Bound to @click, which passes the event. Reading the flag off the element
+// rather than the argument keeps the handler correct when used as a listener.
+const closeMenu = (event?: Event) => {
+  const restoreFocus = !(event instanceof Event)
+
   if (!isMenuOpen.value) return
   isMenuOpen.value = false
   if (restoreFocus) nextTick(() => menuToggle.value?.focus())
+}
+
+const closeMenuKeepingFocus = () => closeMenu()
+
+const openPanel = () => { isPanelOpen.value = true }
+const closePanel = () => { isPanelOpen.value = false }
+
+const pickCategory = (categoryId: string) => {
+  isPanelOpen.value = false
+  isMenuOpen.value = false
+  emit('select-category', categoryId)
 }
 
 const toggleMenu = () => {
@@ -68,13 +86,21 @@ const toggleMenu = () => {
 }
 
 const handleKeydown = (event: KeyboardEvent) => {
-  if (!isMenuOpen.value) return
-
   if (event.key === 'Escape') {
+    if (isPanelOpen.value) {
+      event.preventDefault()
+      closePanel()
+      return
+    }
+
+    if (!isMenuOpen.value) return
+
     event.preventDefault()
     closeMenu()
     return
   }
+
+  if (!isMenuOpen.value) return
 
   if (event.key !== 'Tab' || !mobileMenu.value) return
   const focusable = Array.from(mobileMenu.value.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'))
@@ -91,7 +117,10 @@ const handleKeydown = (event: KeyboardEvent) => {
 }
 
 const handleResize = () => {
-  if (window.innerWidth > 960 && isMenuOpen.value) closeMenu(false)
+  if (window.innerWidth > 960) closePanel()
+  if (window.innerWidth > 960 && isMenuOpen.value) {
+    isMenuOpen.value = false
+  }
 }
 
 watch(isMenuOpen, (open) => {
@@ -119,8 +148,6 @@ onUnmounted(() => {
 <template>
   <header class="site-header" :class="{ 'is-scrolled': isScrolled }">
     <div class="header-inner">
-      <BrandMotionBackground variant="hero" />
-
       <div class="header-track">
         <a
           href="#home"
@@ -128,7 +155,7 @@ onUnmounted(() => {
           :aria-label="`${props.text.hero.eyebrow} — ${props.text.nav.home}`"
         >
           <span class="brand-mark__plate">
-            <SkeletonImage src="/images/logo/logo-without-background.png" alt="" :width="280" :height="270" />
+            <SkeletonImage src="/images/logo/logo-without-background.png" alt="" :width="280" :height="270" priority />
           </span>
 
           <span class="brand-mark__text">
@@ -152,23 +179,38 @@ onUnmounted(() => {
               class="nav-link"
               :href="item.href"
               :aria-current="item.id === props.activeId ? 'true' : undefined"
+              :aria-expanded="item.id === 'menu' ? isPanelOpen : undefined"
+              :aria-controls="item.id === 'menu' ? 'nav-menu-panel' : undefined"
+              @mouseenter="item.id === 'menu' && openPanel()"
+              @focus="item.id === 'menu' && openPanel()"
               @click="closeMenu"
             >
               <span class="nav-link__index" aria-hidden="true">{{ item.index }}</span>
               <span class="nav-link__label">{{ item.label }}</span>
             </a>
 
-            <!-- Hover and keyboard focus open the panel from CSS alone, so the
-                 trigger never has to hold state that can drift out of sync. -->
-            <div v-if="item.id === 'menu'" class="nav-panel">
-              <BrandMotionBackground variant="ember" />
-
+            <!-- Driven by state, not by :hover. A CSS-only panel cannot carry
+                 aria-expanded, cannot be dismissed with Escape, and leaves a
+                 hidden transition running for the whole session. -->
+            <div
+              v-if="item.id === 'menu'"
+              id="nav-menu-panel"
+              class="nav-panel"
+              :class="{ 'is-open': isPanelOpen }"
+              @mouseenter="openPanel()"
+              @mouseleave="closePanel()"
+              @focusout="closePanel()"
+            >
               <div class="nav-panel__group">
                 <span class="nav-panel__label">{{ props.text.menu.eyebrow }}</span>
 
                 <ul class="nav-panel__list">
                   <li v-for="category in categories" :key="category.id">
-                    <a class="nav-panel__link" href="#menu" @click="closeMenu">
+                    <a
+                      class="nav-panel__link"
+                      href="#menu"
+                      @click.prevent="pickCategory(category.id)"
+                    >
                       <Icon :name="category.icon" class="nav-panel__icon" aria-hidden="true" />
                       <span>{{ category.name[props.locale] }}</span>
                     </a>
@@ -181,7 +223,7 @@ onUnmounted(() => {
 
                 <ul class="nav-panel__list">
                   <li v-for="pick in picks" :key="pick.id">
-                    <a class="nav-panel__pick" href="#menu" @click="closeMenu">
+                    <a class="nav-panel__pick" href="#menu" @click="closePanel(); closeMenu()">
                       <span class="nav-panel__pick-name">{{ pick.name }}</span>
                       <span class="nav-panel__rule" aria-hidden="true" />
                       <bdi class="nav-panel__pick-price">{{ pick.price }}</bdi>
@@ -254,8 +296,6 @@ onUnmounted(() => {
           aria-modal="true"
           :aria-label="props.locale === 'ar' ? 'القائمة الرئيسية' : 'Main menu'"
         >
-          <BrandMotionBackground variant="ember" />
-
           <div class="mobile-menu-top">
             <span class="mobile-menu-kicker">{{ props.text.footer.eyebrow }}</span>
             <button

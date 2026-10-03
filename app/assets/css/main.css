@@ -77,46 +77,64 @@ button {
   position: relative;
   isolation: isolate;
   contain: layout style;
-  overflow: hidden;
   width: min(1200px, calc(100% - 32px));
   margin: 0 auto;
   border: 1px solid rgba(245, 211, 58, 0.3);
   border-radius: 22px;
-  background:
+  background-image:
+    repeating-linear-gradient(132deg, transparent 0 38px, rgba(245, 211, 58, 0.13) 39px 40px, transparent 41px 86px),
+    repeating-linear-gradient(42deg, transparent 0 13px, rgba(42, 28, 24, 0.07) 14px 15px, transparent 16px 28px),
     radial-gradient(120% 190% at 50% 0%, rgba(245, 211, 58, 0.16) 0%, rgba(245, 211, 58, 0) 58%),
     linear-gradient(135deg, #3c1416 0%, var(--kompreno-red) 46%, var(--kompreno-red-deep) 100%);
+  background-size: 280px 260px, 140px 140px, auto, auto;
   box-shadow: 0 14px 34px rgba(42, 28, 24, 0.18);
-  transition: width 0.45s var(--reveal-ease-expo), border-radius 0.45s ease, border-color 0.45s ease, background 0.45s ease, box-shadow 0.45s ease;
+  transition: border-radius 0.45s ease, border-color 0.45s ease, background 0.45s ease, box-shadow 0.45s ease;
 }
 
-.header-inner> :not(.brand-motion) {
-  position: relative;
-  z-index: 1;
-}
+/* Static brand texture.
+
+   This is what the animated BrandMotionBackground used to draw: a 6–8% alpha
+   hatch plus a fine shade line, drifting at 190% of its host and repainting
+   every frame forever. Held still it is indistinguishable on screen, and it
+   costs nothing.
+
+   The gradients are declared inline in each host's own background-image list
+   rather than through a shared class, because every one of these hosts already
+   sets a background shorthand and a utility class would lose the cascade
+   race against it. */
 
 .header-track {
   display: flex;
   align-items: center;
   gap: 18px;
+  /* min-height is intentionally not transitioned: it is layout, and the
+     condensed state reads through colour and depth instead of size. */
   min-height: 68px;
   padding: 7px 16px;
-  transition: min-height 0.45s var(--reveal-ease-expo), padding 0.45s ease;
 }
 
 .site-header.is-scrolled .header-inner {
-  width: min(1016px, calc(100% - 32px));
   border-color: rgba(245, 211, 58, 0.22);
   border-radius: 18px;
-  background:
+  background-image:
     radial-gradient(120% 210% at 50% 0%, rgba(215, 25, 32, 0.26) 0%, rgba(215, 25, 32, 0) 62%),
     linear-gradient(180deg, rgba(31, 21, 19, 0.94), rgba(20, 13, 12, 0.92));
-  -webkit-backdrop-filter: blur(14px) saturate(130%);
-  backdrop-filter: blur(14px) saturate(130%);
+  background-size: auto, auto;
   box-shadow: 0 18px 44px rgba(20, 13, 12, 0.26);
 }
 
-.site-header.is-scrolled .header-track {
-  min-height: 58px;
+/* Frosted glass is a progressive enhancement, and only two surfaces earn it:
+   the condensed header and the hero badge. Both wrap content that no longer
+   animates after the per-card motion layers were removed, so the backdrop
+   readback is no longer per-frame work. Everywhere else the blur cost scaled
+   with an animating subtree and was deleted outright. */
+@supports (backdrop-filter: blur(1px)) {
+  @media (min-width: 961px) and (min-resolution: 1.5dppx) {
+    .site-header.is-scrolled .header-inner {
+      -webkit-backdrop-filter: blur(14px) saturate(130%);
+      backdrop-filter: blur(14px) saturate(130%);
+    }
+  }
 }
 
 /* A single hairline at the bar's lower edge carries document progress, which
@@ -335,11 +353,6 @@ button {
   transition: opacity 0.28s ease, translate 0.38s var(--reveal-ease-expo), visibility 0.28s;
 }
 
-.nav-panel> :not(.brand-motion) {
-  position: relative;
-  z-index: 1;
-}
-
 /* Bridges the gap between trigger and panel so the pointer can cross it. */
 .nav-panel::before {
   content: '';
@@ -349,8 +362,10 @@ button {
   height: 18px;
 }
 
-.nav-item:hover .nav-panel,
-.nav-item:focus-within .nav-panel {
+/* Opened from state, not from :hover. A CSS-only panel cannot carry
+   aria-expanded, cannot be dismissed on Escape, and keeps a hidden
+   transition alive for the whole session. */
+.nav-panel.is-open {
   opacity: 1;
   visibility: visible;
   translate: -50% 0;
@@ -561,9 +576,9 @@ button {
   z-index: 80;
   display: flex;
   justify-content: flex-start;
-  background: rgba(20, 13, 12, 0.62);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  /* Opaque rather than blurred. This is a full-viewport surface, and a
+     backdrop-filter here re-read the whole page on every frame it was open. */
+  background: rgba(20, 13, 12, 0.94);
 }
 
 [dir='rtl'] .mobile-menu-overlay {
@@ -580,14 +595,17 @@ button {
   height: 100%;
   overflow-y: auto;
   padding: 22px;
-  background:
+  background-image:
+    repeating-linear-gradient(132deg, transparent 0 38px, rgba(245, 211, 58, 0.07) 39px 40px, transparent 41px 86px),
+    repeating-linear-gradient(42deg, transparent 0 13px, rgba(0, 0, 0, 0.12) 14px 15px, transparent 16px 28px),
     radial-gradient(120% 56% at 50% 0%, rgba(215, 25, 32, 0.36) 0%, rgba(215, 25, 32, 0) 64%),
     linear-gradient(180deg, #2a1a18 0%, #1a100e 100%);
+  background-size: 280px 260px, 140px 140px, auto, auto;
   color: var(--kompreno-white);
   box-shadow: 24px 0 56px rgba(20, 13, 12, 0.34);
 }
 
-.mobile-menu-panel> :not(.brand-motion) {
+.mobile-menu-panel > * {
   position: relative;
   z-index: 1;
 }
@@ -883,12 +901,6 @@ button {
   --motion-glint: rgba(255, 229, 112, 0.16);
 }
 
-.brand-motion--ember {
-  --motion-line: rgba(245, 211, 58, 0.08);
-  --motion-shade: rgba(0, 0, 0, 0.12);
-  --motion-glint: rgba(255, 229, 112, 0.1);
-}
-
 .brand-motion__pattern {
   position: absolute;
   inset: -45%;
@@ -906,6 +918,11 @@ button {
   background-image: repeating-linear-gradient(0deg, transparent 0 31px, rgba(255, 255, 255, 0.025) 32px, transparent 33px 64px);
 }
 
+/* One sweep, no blend mode. `mix-blend-mode: screen` on a full-bleed band
+   forces the backdrop to be composited into its own layer and re-blended on
+   every frame of a 19-second loop, over a hero that is already animating. The
+   gradient reads as a light pass on its own; the blend bought nothing and cost
+   the frame budget. */
 .brand-motion__sweep {
   position: absolute;
   top: -55%;
@@ -915,20 +932,20 @@ button {
   opacity: 0;
   transform: rotate(19deg);
   background: linear-gradient(90deg, transparent, var(--motion-glint) 48%, rgba(255, 255, 255, 0.035) 56%, transparent);
-  mix-blend-mode: screen;
-  animation: kompreno-heat-pass 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-.brand-motion__sweep--two {
-  animation-delay: -9s;
-  animation-duration: 23s;
-  opacity: 0.75;
+  animation: kompreno-heat-pass 26s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 /* Drifting patterns and blended sweeps repaint every frame, so they idle when
-   the panel they belong to is nowhere near the viewport. */
-.brand-motion[data-liveness]:not(.is-live) .brand-motion__pattern,
-.brand-motion[data-liveness]:not(.is-live) .brand-motion__sweep {
+   the panel they belong to is nowhere near the viewport.
+
+   The pause keys on an explicit .is-idle rather than on the absence of
+   .is-live. IntersectionObserver callbacks are coalesced and main-thread
+   bound, so "not intersecting" can arrive for an element that is plainly on
+   screen; treating that as "stop animating" froze the layer in place, which
+   read as a stuck page. Failing open costs a repaint; failing closed cost
+   the reader their animation. */
+.brand-motion[data-liveness].is-idle .brand-motion__pattern,
+.brand-motion[data-liveness].is-idle .brand-motion__sweep {
   animation-play-state: paused;
 }
 
@@ -1235,10 +1252,8 @@ button {
   max-width: 232px;
   padding: 11px 16px;
   border-radius: 18px;
-  background: rgba(24, 12, 10, 0.58);
+  background: rgba(24, 12, 10, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  -webkit-backdrop-filter: blur(10px) saturate(130%);
-  backdrop-filter: blur(10px) saturate(130%);
   color: rgba(255, 255, 255, 0.94);
   font-size: 0.84rem;
   font-weight: 700;
@@ -1253,11 +1268,24 @@ button {
   color: var(--kompreno-yellow);
 }
 
+/* Second and last frosted surface. It sits over the hero, which is the one
+   place a per-frame backdrop readback is affordable, and it is gated on
+   capability and viewport like the header. */
+@supports (backdrop-filter: blur(1px)) {
+  @media (min-width: 961px) and (min-resolution: 1.5dppx) {
+    .hero-glass {
+      -webkit-backdrop-filter: blur(10px) saturate(130%);
+      backdrop-filter: blur(10px) saturate(130%);
+    }
+  }
+}
+
 .section {
   padding: 52px 0;
 }
 
 #home,
+#featured,
 #menu,
 #about,
 #contact {
@@ -1279,11 +1307,17 @@ button {
   margin-bottom: 32px;
 }
 
-/* Both menu grids are the same honest three-up board. */
+/* Both menu grids are the same honest three-up board.
+
+   align-items: start matters. The default stretch ties every card in a row to
+   the tallest one, so opening the customiser on a single card grew the whole
+   grid row — and with it the two sibling cards the reader never touched, on
+   every frame of the transition. */
 .featured-grid,
 .product-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
   column-gap: 24px;
   row-gap: 32px;
 }
@@ -1313,10 +1347,14 @@ button {
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: var(--radius-lg);
-  /* Same ground as the hero so the dish grid reads as one continuous surface. */
-  background:
+  /* Same ground as the hero so the dish grid reads as one continuous surface.
+     The hatch is the static texture the animated layer used to draw at 6%
+     alpha — identical on screen, but it no longer repaints every frame. */
+  background-image:
+    repeating-linear-gradient(132deg, transparent 0 38px, rgba(245, 211, 58, 0.06) 39px 40px, transparent 41px 86px),
     radial-gradient(118% 92% at 86% 6%, rgba(245, 211, 58, 0.24), transparent 58%),
     linear-gradient(140deg, #d71920 0%, #b3121a 54%, #8c0e15 100%);
+  background-size: 280px 260px, auto, auto;
   box-shadow: 0 18px 40px rgba(112, 10, 16, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.14);
   transition:
     transform 0.34s var(--reveal-ease-expo),
@@ -1364,38 +1402,19 @@ button {
   border-color: rgba(245, 211, 58, 0.46);
 }
 
-/* The hero's drifting light also runs behind every card, softened and slowed so
-   a full grid reads as one slow shimmer rather than a dozen competing loops. The
-   horizontal etching is dropped here because it bands behind the card text. */
-.card .brand-motion {
-  --motion-line: rgba(245, 211, 58, 0.06);
-  --motion-shade: rgba(0, 0, 0, 0.08);
-  --motion-glint: rgba(255, 229, 112, 0.07);
-}
-
-.card .brand-motion__pattern {
-  animation-duration: 62s;
-}
-
-.card .brand-motion__etching {
-  display: none;
-}
-
-.card .brand-motion__sweep {
-  animation-duration: 30s;
-}
-
-.card .brand-motion__sweep--two {
-  animation-duration: 38s;
-}
-
 /* Artwork sits inside the card, so the grid keeps a clean baseline. */
 .card-media {
   position: relative;
-  z-index: 0;
+  z-index: 2;
   aspect-ratio: 4 / 3;
   overflow: hidden;
   background: var(--kompreno-canvas);
+}
+
+/* Portrait assets get a taller frame so a 3:4 photograph is not cropped down
+   to a letterbox inside the 4:3 slot every dish uses. */
+.card-media.is-portrait {
+  aspect-ratio: 3 / 4;
 }
 
 .card-media::after {
@@ -1436,6 +1455,23 @@ html.reveal-ready .card-media {
   scale: 1;
 }
 
+/* Fails open. The reveal is driven by an IntersectionObserver callback, and a
+   callback that is coalesced away used to leave the photograph clipped to zero
+   height for the rest of the session — the card showed only the surface behind
+   it, which is what "the animation covers the photo and gets stuck" looked
+   like. The backstop in reveal.ts marks this state; here it resolves to the
+   finished layout regardless of what the observer did, and without a
+   transition, since animating an element already in view reads as a glitch. */
+.card[data-reveal-stranded] .card-media {
+  clip-path: inset(0 0 0 0);
+  scale: 1;
+  transition: none;
+}
+
+.card[data-reveal-stranded] .card-media img {
+  scale: 1;
+}
+
 /* The artwork itself arrives oversized, then settles once the curtain lands. */
 html.reveal-ready .card-media img {
   scale: 1.16;
@@ -1465,9 +1501,10 @@ html.reveal-ready .card-media img {
   padding: 6px 12px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(24, 12, 10, 0.55);
-  -webkit-backdrop-filter: blur(9px) saturate(130%);
-  backdrop-filter: blur(9px) saturate(130%);
+  /* Solid rather than blurred. Twelve of these sat directly on the artwork, so
+     each one forced a backdrop readback of a photograph that was itself
+     moving through a scale transition. */
+  background: rgba(24, 12, 10, 0.78);
   font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -1787,9 +1824,10 @@ html.reveal-ready .card-media img {
 }
 
 .menu-shell {
-  background: rgba(255, 255, 255, 0.16);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
-  backdrop-filter: blur(8px) saturate(120%);
+  /* Raised from 0.16 to compensate for losing the blur. This shell used to
+     re-read and re-blur roughly 1156 x 2000px on every frame, because it
+     wrapped twelve continuously animating cards. */
+  background: rgba(255, 255, 255, 0.34);
   border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.62);
   padding: 22px;
@@ -1884,18 +1922,17 @@ html.reveal-ready .card-media img {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(42, 28, 24, 0.96), rgba(215, 25, 32, 0.9));
+  background-image:
+    repeating-linear-gradient(132deg, transparent 0 38px, rgba(245, 211, 58, 0.08) 39px 40px, transparent 41px 86px),
+    repeating-linear-gradient(42deg, transparent 0 13px, rgba(0, 0, 0, 0.12) 14px 15px, transparent 16px 28px),
+    linear-gradient(135deg, rgba(42, 28, 24, 0.96), rgba(215, 25, 32, 0.9));
+  background-size: 280px 260px, 140px 140px, auto;
   color: var(--kompreno-white);
   border-radius: 30px;
   padding: 32px;
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 24px;
-}
-
-.contact-panel>*:not(.brand-motion) {
-  position: relative;
-  z-index: 1;
 }
 
 .contact-panel p {
@@ -1998,15 +2035,13 @@ html.reveal-ready .card-media img {
   overflow: hidden;
   padding-bottom: 26px;
   border-top: 1px solid rgba(245, 211, 58, 0.22);
-  background:
+  background-image:
+    repeating-linear-gradient(132deg, transparent 0 38px, rgba(245, 211, 58, 0.08) 39px 40px, transparent 41px 86px),
+    repeating-linear-gradient(42deg, transparent 0 13px, rgba(0, 0, 0, 0.12) 14px 15px, transparent 16px 28px),
     radial-gradient(132% 76% at 50% 0%, rgba(215, 25, 32, 0.3) 0%, rgba(215, 25, 32, 0) 62%),
     linear-gradient(180deg, #271a19 0%, #1d1211 44%, #130b0a 100%);
+  background-size: 280px 260px, 140px 140px, auto, auto;
   color: var(--kompreno-white);
-}
-
-.footer> :not(.brand-motion) {
-  position: relative;
-  z-index: 1;
 }
 
 /* Lede — logo plate, statement, action */
@@ -2883,6 +2918,19 @@ html.reveal-ready .card-media img {
 
 }
 
+/* Available to assistive technology, invisible on screen. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ==============================================================
    System backdrop
    A single fixed, GPU-only light field behind the whole document.
@@ -2913,11 +2961,13 @@ html.reveal-ready .card-media img {
     linear-gradient(180deg, var(--kompreno-canvas-light) 0%, var(--kompreno-canvas) 62%, #e2e3e1 100%);
 }
 
+/* No will-change here. These are three viewport-sized squares; promoting them
+   permanently held three large textures for the whole session. The animations
+   are transform-only, so the engine promotes them on demand anyway. */
 .system-backdrop__light {
   width: clamp(640px, 96vw, 1240px);
   aspect-ratio: 1;
   border-radius: 50%;
-  will-change: transform;
 }
 
 .system-backdrop__light--amber {
@@ -2993,11 +3043,15 @@ html.reveal-ready .card-media img {
   background: radial-gradient(126% 92% at 50% 40%, transparent 40%, rgba(42, 28, 24, 0.05) 76%, rgba(42, 28, 24, 0.115) 100%);
 }
 
+/* Grain without the blend. A full-viewport mix-blend-mode layer forces the
+   whole backdrop to be re-rastered and re-blended every frame, and the sweep
+   above it did the same. The turbulence is replaced by the static dither
+   gradient that was already in the layer stack. */
 .system-backdrop__grain {
   inset: 0;
   opacity: 0.5;
-  mix-blend-mode: soft-light;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: radial-gradient(rgba(42, 28, 24, 0.05) 0.5px, transparent 0.6px);
+  background-size: 3px 3px;
 }
 
 @keyframes kompreno-light-amber {
@@ -3121,7 +3175,8 @@ html.reveal-ready .card-media img {
 
 @media (max-width: 640px) {
   .system-backdrop__light--cool,
-  .system-backdrop__baseline {
+  .system-backdrop__baseline,
+  .system-backdrop__sweep {
     display: none;
   }
 
@@ -3698,8 +3753,21 @@ html.reveal-ready .reveal {
   transition:
     opacity var(--reveal-t),
     translate var(--reveal-t),
+    scale var(--reveal-t);
+}
+
+/* Only the targets that actually animate these properties opt in. The blanket
+   list above made every reveal target watch filter and clip-path it never used. */
+html.reveal-ready .reveal[data-reveal='blur'] {
+  transition: opacity var(--reveal-t), translate var(--reveal-t), filter var(--reveal-t);
+}
+
+html.reveal-ready .reveal[data-reveal='curtain'],
+.card[data-reveal='curtain'] {
+  transition:
+    opacity var(--reveal-t),
+    translate var(--reveal-t),
     scale var(--reveal-t),
-    filter var(--reveal-t),
     clip-path var(--reveal-t);
 }
 
@@ -3711,8 +3779,6 @@ html.reveal-ready .card {
     opacity var(--reveal-t),
     translate var(--reveal-t),
     scale var(--reveal-t),
-    filter var(--reveal-t),
-    clip-path var(--reveal-t),
     transform 0.34s var(--reveal-ease-expo),
     border-color 0.3s ease;
 }
@@ -3724,8 +3790,6 @@ html.reveal-ready .hero-topic {
     opacity var(--reveal-t),
     translate var(--reveal-t),
     scale var(--reveal-t),
-    filter var(--reveal-t),
-    clip-path var(--reveal-t),
     transform 0.2s ease,
     border-color 0.2s ease,
     background-color 0.2s ease,
@@ -3734,7 +3798,13 @@ html.reveal-ready .hero-topic {
 
 html.reveal-ready .reveal:not(.is-inview) {
   opacity: 0;
-  will-change: opacity, translate, scale, clip-path;
+}
+
+/* Promotion is opt-in per element, and only while that element is actually
+   moving. The unconditional version held a composited layer for every
+   unrevealed card, each carrying a decoded 1200x800 photograph. */
+html.reveal-ready .reveal.is-revealing {
+  will-change: opacity, translate;
 }
 
 html.reveal-ready .reveal[data-reveal='up']:not(.is-inview) {
@@ -3774,6 +3844,17 @@ html.reveal-ready .reveal.is-inview {
   translate: none;
   scale: none;
   filter: none;
+  clip-path: none;
+}
+
+/* Backstop fired: an observer callback never arrived for a clipped element.
+   The clip is removed outright, with no transition, because animating an
+   element that is already in view reads as a glitch rather than a reveal. */
+html.reveal-ready .reveal[data-reveal-stranded] {
+  transition: none;
+  opacity: 1;
+  translate: none;
+  scale: none;
   clip-path: none;
 }
 
@@ -4062,6 +4143,12 @@ html.reveal-ready .highlight-box.is-inview::after {
   height: 100%;
 }
 
+/* <picture> is an inline box by default, which leaves a baseline gap under the
+   image and defeats the fixed-height plates it now sits inside. */
+.skeleton-image picture {
+  display: contents;
+}
+
 .skeleton-image__shimmer {
   position: absolute;
   inset: 0;
@@ -4093,6 +4180,17 @@ html.reveal-ready .highlight-box.is-inview::after {
   background: rgba(245, 211, 58, 0.12);
 }
 
+/* Above-the-fold artwork loads eagerly, so the sweep only ever runs on top of
+   an already-decoding image. It is an infinite animation on the largest,
+   most visible element on the page. */
+.skeleton-image.is-priority .skeleton-image__shimmer {
+  background: none;
+}
+
+.skeleton-image.is-priority .skeleton-image__shimmer::after {
+  display: none;
+}
+
 .skeleton-image.is-loaded .skeleton-image__shimmer,
 .skeleton-image.is-failed .skeleton-image__shimmer {
   opacity: 0;
@@ -4119,9 +4217,7 @@ html.reveal-ready .highlight-box.is-inview::after {
   border-top: 1px solid rgba(245, 211, 58, 0.32);
   background:
     radial-gradient(120% 220% at 0% 100%, rgba(215, 25, 32, 0.32) 0%, rgba(215, 25, 32, 0) 58%),
-    linear-gradient(180deg, rgba(31, 19, 18, 0.97), rgba(16, 10, 9, 0.98));
-  -webkit-backdrop-filter: blur(16px) saturate(130%);
-  backdrop-filter: blur(16px) saturate(130%);
+    linear-gradient(180deg, rgba(31, 19, 18, 0.99), rgba(16, 10, 9, 0.995));
   box-shadow: 0 -18px 44px rgba(20, 11, 10, 0.34);
   color: var(--kompreno-white);
 }
@@ -4407,16 +4503,21 @@ html.reveal-ready .highlight-box.is-inview::after {
 }
 
 /* The bar is fixed, so the page has to reserve the room it takes and the
-   back-to-top dial has to step over it. */
-body:has(.cart-bar) {
+   back-to-top dial has to step over it.
+
+   Keyed on an explicit body class, set by CartBar. `:has()` on <body> is
+   re-evaluated on every DOM mutation anywhere in the document, which put a
+   whole-document layout invalidation inside the add-to-cart interaction —
+   the same interaction that is already the busiest moment on the page. */
+body.has-cart {
   padding-bottom: 92px;
 }
 
-body:has(.cart-bar) .footer {
+body.has-cart .footer {
   padding-bottom: 116px;
 }
 
-body:has(.cart-bar) .footer-top {
+body.has-cart .footer-top {
   inset-block-end: 112px;
 }
 
@@ -4443,7 +4544,7 @@ body:has(.cart-bar) .footer-top {
     text-align: start;
   }
 
-  body:has(.cart-bar) {
+  body.has-cart {
     padding-bottom: 156px;
   }
 }

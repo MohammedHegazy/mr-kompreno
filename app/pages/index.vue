@@ -43,9 +43,20 @@ function selectCategory(categoryId: string) {
 
 useSeoMeta({
   title: computed(() => (locale.value === 'ar' ? 'MR.KOMPRENO | القائمة الرقمية' : 'MR.KOMPRENO | Digital Menu')),
-  description: computed(() => (locale.value === 'ar' ? 'قائمة رقمية احترافية لعلامة MR.KOMPRENO الغذائية.' : 'Professional digital menu and brand experience for MR.KOMPRENO.')),
+  description: computed(() => (locale.value === 'ar' ? 'قائمة رقمية احترافية لعلامة MR.KOMPRENO الغذائية.' : 'Professional digital menu and brand showcase for MR.KOMPRENO.')),
   ogTitle: 'MR.KOMPRENO',
   ogDescription: 'A premium bilingual digital menu and brand showcase.',
+})
+
+// lang and dir belong on <html>, not on an inner wrapper. Screen readers pick
+// the pronunciation dictionary, the browser picks hyphenation and text
+// justification, and the scrollbar lands on the correct side — all of them read
+// the document element only.
+useHead({
+  htmlAttrs: {
+    lang: locale,
+    dir,
+  },
 })
 </script>
 

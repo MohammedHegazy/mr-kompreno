@@ -19,6 +19,18 @@ const countLabel = computed(() =>
   count.value === 1 ? props.text.cart.item : props.text.cart.items,
 )
 
+// The stylesheet reserves room for the bar with `body.has-cart`, set here
+// rather than with `body:has(.cart-bar)`. `:has()` on <body> is re-evaluated
+// on every DOM mutation in the document, and the add-to-cart click is exactly
+// the moment the document already has the most work queued up.
+watch(count, (value) => {
+  if (import.meta.client) document.body.classList.toggle('has-cart', value > 0)
+}, { immediate: true })
+
+onBeforeUnmount(() => {
+  if (import.meta.client) document.body.classList.remove('has-cart')
+})
+
 // A modified click means the reader is opening the thread in another tab, so the
 // basket has to survive for them.
 function onCheckout(event: MouseEvent) {

@@ -64,13 +64,15 @@ const props = defineProps<{
       <div class="hero-visual">
         <figure
           class="hero-frame"
-          v-reveal="{ from: 'curtain', duration: 1400, delay: 240, ease: 'mask' }"
+          v-reveal="{ from: 'curtain', duration: 900, delay: 120, ease: 'mask' }"
         >
           <SkeletonImage
             :src="props.spotlight.image"
             :alt="props.spotlight.name[props.locale]"
             :width="1200"
             :height="800"
+            sizes="(max-width: 960px) 100vw, 50vw"
+            priority
           />
         </figure>
 

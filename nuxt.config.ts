@@ -5,6 +5,13 @@ export default defineNuxtConfig({
   modules: ['@nuxt/icon'],
   app: {
     head: {
+      // Rendered into the static shell before the app boots, so the document
+      // is never briefly unlabelled. index.vue keeps it in sync with the
+      // active locale.
+      htmlAttrs: {
+        lang: 'ar',
+        dir: 'rtl',
+      },
       link: [
         {
           rel: 'icon',

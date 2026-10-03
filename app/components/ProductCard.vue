@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { menuCategories, type Locale, type MenuProduct } from '~/data/menu'
-import BrandMotionBackground from './BrandMotionBackground.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -76,10 +75,14 @@ onBeforeUnmount(() => {
 
 <template>
   <article class="card" :class="{ 'is-open': isCustomising }">
-    <BrandMotionBackground variant="ember" />
-
-    <div class="card-media">
-      <SkeletonImage :src="props.item.image" :alt="props.item.name[props.locale]" />
+    <div class="card-media" :class="{ 'is-portrait': props.item.portrait }">
+      <SkeletonImage
+        :src="props.item.image"
+        :alt="props.item.name[props.locale]"
+        :width="1200"
+        :height="800"
+        :sizes="'(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 400px'"
+      />
     </div>
 
     <div class="card-overlay">
@@ -120,6 +123,10 @@ onBeforeUnmount(() => {
         />
         <span>{{ isCustomising ? props.text.menu.cancel : justAdded ? props.text.menu.added : props.text.menu.add }}</span>
       </button>
+
+      <span class="visually-hidden" role="status" aria-live="polite">
+        {{ justAdded ? `${props.item.name[props.locale]} — ${props.text.menu.added}` : '' }}
+      </span>
 
       <div :id="panelId" class="card-panel">
         <div class="card-panel__inner">
