@@ -37,11 +37,36 @@ const EASES: Record<NonNullable<RevealOptions['ease']>, string> = {
 }
 
 let observer: IntersectionObserver | null = null
+let liveness: IntersectionObserver | null = null
 let armed = false
 let settled = false
 const queued = new Set<HTMLElement>()
 
+/** Elements whose decorative loops must not burn frames while off screen. */
+const LIVE_SELECTOR = '.card, .product-card, .brand-motion'
+
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+/**
+ * Ambient loops (rotating card edges, drifting backdrops) repaint on every
+ * frame, so they only run while the element is near the viewport or hovered.
+ */
+const observeLive = (element: HTMLElement) => {
+  element.setAttribute('data-liveness', '')
+
+  if (!liveness) {
+    liveness = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          ;(entry.target as HTMLElement).classList.toggle('is-live', entry.isIntersecting)
+        }
+      },
+      { rootMargin: '160px 0px 160px 0px', threshold: 0 },
+    )
+  }
+
+  liveness.observe(element)
+}
 
 const show = (element: HTMLElement) => {
   element.classList.add('is-inview')
@@ -74,6 +99,8 @@ const arm = () => {
   armed = true
 
   document.documentElement.classList.add('reveal-ready')
+
+  for (const element of document.querySelectorAll<HTMLElement>(LIVE_SELECTOR)) observeLive(element)
 
   if (prefersReducedMotion()) {
     queued.forEach(show)
@@ -123,6 +150,8 @@ const configure = (element: HTMLElement, options: RevealOptions) => {
 
   element.setAttribute('data-reveal', settings.from)
   element.classList.add('reveal')
+
+  if (element.matches(LIVE_SELECTOR)) observeLive(element)
 }
 
 const reveal: Directive<HTMLElement, RevealOptions | undefined> = {
@@ -152,6 +181,7 @@ const reveal: Directive<HTMLElement, RevealOptions | undefined> = {
   unmounted(element) {
     queued.delete(element)
     observer?.unobserve(element)
+    liveness?.unobserve(element)
   },
 }
 

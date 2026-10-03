@@ -74,6 +74,7 @@ button {
 .header-inner {
   position: relative;
   isolation: isolate;
+  contain: layout style;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -86,7 +87,7 @@ button {
   border-radius: 20px;
   background: var(--kompreno-red);
   box-shadow: 0 12px 28px rgba(42, 28, 24, 0.16);
-  transition: width 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .header-inner> :not(.brand-motion) {
@@ -109,7 +110,7 @@ button {
   height: 50px;
   object-fit: contain;
   flex: 0 0 50px;
-  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .site-header.is-scrolled .brand-mark img {
@@ -424,6 +425,13 @@ button {
   animation-delay: -9s;
   animation-duration: 23s;
   opacity: 0.75;
+}
+
+/* Drifting patterns and blended sweeps repaint every frame, so they idle when
+   the panel they belong to is nowhere near the viewport. */
+.brand-motion[data-liveness]:not(.is-live) .brand-motion__pattern,
+.brand-motion[data-liveness]:not(.is-live) .brand-motion__sweep {
+  animation-play-state: paused;
 }
 
 @keyframes kompreno-pattern-drift {
@@ -803,7 +811,7 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.82);
   -webkit-backdrop-filter: blur(8px) saturate(120%);
   backdrop-filter: blur(8px) saturate(120%);
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease;
 }
 
 .card::before,
@@ -828,8 +836,28 @@ button {
   -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
+  opacity: 0.72;
   pointer-events: none;
   animation: kompreno-card-edge-rotate 8s linear infinite;
+  transition: opacity 0.3s ease;
+}
+
+/* The sweep only runs for cards the reader can actually see. */
+.card[data-liveness]:not(.is-live)::before,
+.product-card[data-liveness]:not(.is-live)::before {
+  animation-play-state: paused;
+}
+
+.card.is-live::before,
+.card:hover::before,
+.product-card.is-live::before,
+.product-card:hover::before {
+  animation-play-state: running;
+}
+
+.card:hover::before,
+.product-card:hover::before {
+  opacity: 1;
 }
 
 @property --kompreno-card-edge-angle {
@@ -1031,7 +1059,7 @@ button {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.96), 0 12px 30px rgba(42, 28, 24, 0.09);
   -webkit-backdrop-filter: blur(8px) saturate(120%);
   backdrop-filter: blur(8px) saturate(120%);
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease;
 }
 
 .product-card .card-media img {
@@ -1052,12 +1080,6 @@ button {
     transform: translateY(-6px);
     border-color: rgba(215, 25, 32, 0.3);
     box-shadow: 0 22px 38px rgba(215, 25, 32, 0.13), 0 8px 18px rgba(42, 28, 24, 0.1);
-  }
-
-  .card:hover::before,
-  .product-card:hover::before {
-    animation-duration: 3.2s;
-    filter: brightness(1.12);
   }
 
   .card:hover .card-media img,
@@ -2174,6 +2196,36 @@ html.reveal-ready .reveal {
     scale var(--reveal-t),
     filter var(--reveal-t),
     clip-path var(--reveal-t);
+}
+
+/* Interactive reveal targets keep their hover motion: the reveal list above
+   replaces any component transition, so the hover properties are re-declared
+   next to it. Cards stay shadow-free because repainting one is not cheap. */
+html.reveal-ready .card,
+html.reveal-ready .product-card {
+  transition:
+    opacity var(--reveal-t),
+    translate var(--reveal-t),
+    scale var(--reveal-t),
+    filter var(--reveal-t),
+    clip-path var(--reveal-t),
+    transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.3s ease;
+}
+
+html.reveal-ready .social-link,
+html.reveal-ready .category-button,
+html.reveal-ready .hero-topic {
+  transition:
+    opacity var(--reveal-t),
+    translate var(--reveal-t),
+    scale var(--reveal-t),
+    filter var(--reveal-t),
+    clip-path var(--reveal-t),
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 html.reveal-ready .reveal:not(.is-inview) {
