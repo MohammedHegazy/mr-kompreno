@@ -459,17 +459,27 @@ const runViewport = async (viewport, { killObserver }) => {
   // can ask for. A missing candidate is a 404 that only shows up on the
   // devices dense enough to select it.
   const rungs = await evaluate(sessionId, `(() => {
-    const missing = []
+    const urls = new Set()
 
     for (const img of document.querySelectorAll('.card-media img')) {
-      const parsed = img.srcset || img.querySelector('source')?.srcset || ''
-      for (const candidate of parsed.split(',')) {
-        const url = candidate.trim().split(/\\s+/)[0]
-        if (url) missing.push(url)
+      // The candidates live on sibling <source> elements; img.srcset is empty
+      // whenever a <picture> is used, so reading it alone checks nothing.
+      const picture = img.closest('picture')
+
+      const lists = [
+        ...(picture ? [...picture.querySelectorAll('source')].map((s) => s.srcset) : []),
+        img.getAttribute('srcset') ?? '',
+      ]
+
+      for (const list of lists) {
+        for (const candidate of list.split(',')) {
+          const url = candidate.trim().split(/\\s+/)[0]
+          if (url) urls.add(url)
+        }
       }
     }
 
-    return [...new Set(missing)]
+    return [...urls]
   })()`)
 
   const absent = []
@@ -478,9 +488,10 @@ const runViewport = async (viewport, { killObserver }) => {
     if (status !== 200) absent.push(`${url} -> ${status}`)
   }
 
+  report('the srcset offered real candidates', rungs.length, (n) => n > 0)
   report('every advertised derivative exists', absent.length, (n) => n === 0)
   if (absent.length) console.log(`        absent: ${JSON.stringify(absent.slice(0, 5))}`)
-  console.log(`  INFO  ${rungs.length} candidate(s) offered, all reachable`)
+  console.log(`  INFO  ${rungs.length} candidate(s) offered, ${rungs.length - absent.length} reachable`)
 
   console.log(`  INFO  ${board.cards} cards, images ${JSON.stringify(board.mediaSizes)}, card heights ${JSON.stringify(board.cardHeights)}`)
 
