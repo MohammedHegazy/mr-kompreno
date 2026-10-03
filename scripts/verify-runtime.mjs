@@ -482,16 +482,22 @@ const runViewport = async (viewport, { killObserver }) => {
     return [...urls]
   })()`)
 
+  // Status is not enough: the local server, like Netlify's SPA fallback, answers
+  // a missing asset with 200 and the shell's HTML. Only the content type
+  // distinguishes a derivative from the page that was served in its place.
   const absent = []
   for (const url of rungs) {
-    const status = await evaluate(sessionId, `fetch(${JSON.stringify(url)}, { method: 'HEAD' }).then((r) => r.status).catch(() => 0)`)
-    if (status !== 200) absent.push(`${url} -> ${status}`)
+    const type = await evaluate(sessionId, `fetch(${JSON.stringify(url)})
+      .then((r) => r.headers.get('content-type') || '')
+      .catch(() => '')`)
+
+    if (!type.startsWith('image/')) absent.push(`${url} -> ${type || 'no response'}`)
   }
 
   report('the srcset offered real candidates', rungs.length, (n) => n > 0)
-  report('every advertised derivative exists', absent.length, (n) => n === 0)
+  report('every advertised derivative is really an image', absent.length, (n) => n === 0)
   if (absent.length) console.log(`        absent: ${JSON.stringify(absent.slice(0, 5))}`)
-  console.log(`  INFO  ${rungs.length} candidate(s) offered, ${rungs.length - absent.length} reachable`)
+  console.log(`  INFO  ${rungs.length} candidate(s) offered, ${rungs.length - absent.length} served as images`)
 
   console.log(`  INFO  ${board.cards} cards, images ${JSON.stringify(board.mediaSizes)}, card heights ${JSON.stringify(board.cardHeights)}`)
 
