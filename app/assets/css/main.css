@@ -1762,7 +1762,10 @@ html.reveal-ready .card-media img {
   background: rgba(255, 255, 255, 0.12);
 }
 
-.customiser-close svg {
+/* Iconify renders a masked span, not an svg, and takes its ink from
+   `background-color: currentColor`. Both are matched so the button keeps
+   working if the rendering mode ever changes. */
+.customiser-close :is(svg, .iconify) {
   width: 17px;
   height: 17px;
 }

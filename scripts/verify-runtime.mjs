@@ -479,10 +479,13 @@ const runViewport = async (viewport, { killObserver }) => {
     const thumbBox = thumb?.getBoundingClientRect()
 
     const close = panel.querySelector('.customiser-close')
-    const closeIcon = close?.querySelector('svg')
-    const closeColor = getComputedStyle(closeIcon).stroke
-    const closeInk = getComputedStyle(close).color
-    const closeDebug = { html: close?.innerHTML?.slice(0, 160) }
+    const closeIcon = close?.querySelector('.iconify, svg')
+    const closeInk = close ? getComputedStyle(close).color : null
+    const closePaint = closeIcon ? getComputedStyle(closeIcon).backgroundColor : null
+    const closeSize = closeIcon
+      ? [Math.round(closeIcon.getBoundingClientRect().width), Math.round(closeIcon.getBoundingClientRect().height)]
+      : null
+    const closeDebug = { found: Boolean(close), html: close?.innerHTML?.slice(0, 200) ?? null }
 
     return {
       count: panels.length,
@@ -492,8 +495,9 @@ const runViewport = async (viewport, { killObserver }) => {
       labelled: !!panel.getAttribute('aria-labelledby'),
       name,
       nameMatches: name === cardName,
-      closeColor,
       closeInk,
+      closePaint,
+      closeSize,
       closeDebug,
       thumbWidth: Math.round(thumbBox?.width ?? 0),
       thumbHeight: Math.round(thumbBox?.height ?? 0),
@@ -515,8 +519,12 @@ const runViewport = async (viewport, { killObserver }) => {
   report('the customiser takes focus', dialog.focusInside, (v) => v === true)
   report('the customiser fits the viewport', dialog.onScreen, (v) => v === true)
   report('the customiser thumbnail is not stretched', dialog.thumbFits, (v) => v === true)
-  report('the close icon is the brand yellow', dialog.closeColor, (v) => v === 'rgb(245, 211, 58)')
-  console.log(`        close debug: ${JSON.stringify({ ink: dialog.closeInk, stroke: dialog.closeColor, html: dialog.closeDebug })}`)
+  // Iconify paints a masked span with `background-color: currentColor`, so the
+  // button's colour is only half the claim: the glyph itself must be yellow.
+  report('the close button asks for the brand yellow', dialog.closeInk, (v) => v === 'rgb(245, 211, 58)')
+  report('the close icon paints the brand yellow', dialog.closePaint, (v) => v === 'rgb(245, 211, 58)')
+  report('the close icon is sized', dialog.closeSize, (v) => v[0] > 0 && v[1] > 0)
+  console.log(`        close debug: ${JSON.stringify({ ink: dialog.closeInk, paint: dialog.closePaint, size: dialog.closeSize })}`)
   report('the customiser opens with quantity 1', dialog.quantity, (v) => v === '1')
   report('the customiser has a notes field', dialog.hasNotes, (v) => v === true)
   report('the customiser has a confirm button', dialog.hasConfirm, (v) => v === true)
