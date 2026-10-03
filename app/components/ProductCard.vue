@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { menuCategories, type Locale, type MenuProduct } from '~/data/menu'
+import BrandMotionBackground from './BrandMotionBackground.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -41,6 +42,19 @@ function openCustomiser() {
   isCustomising.value = true
 }
 
+// Cancelling drops the draft so a reopened panel never shows a stale quantity
+// or a half-written note.
+function closeCustomiser() {
+  isCustomising.value = false
+  quantity.value = 1
+  note.value = ''
+}
+
+function toggleCustomiser() {
+  if (isCustomising.value) closeCustomiser()
+  else openCustomiser()
+}
+
 function confirmAdd() {
   add(props.item, quantity.value, note.value)
 
@@ -62,6 +76,8 @@ onBeforeUnmount(() => {
 
 <template>
   <article class="card" :class="{ 'is-open': isCustomising }">
+    <BrandMotionBackground variant="ember" />
+
     <div class="card-media">
       <SkeletonImage :src="props.item.image" :alt="props.item.name[props.locale]" />
     </div>
@@ -95,14 +111,14 @@ onBeforeUnmount(() => {
         :disabled="isSoldOut"
         :aria-expanded="isCustomising"
         :aria-controls="panelId"
-        @click="openCustomiser"
+        @click="toggleCustomiser"
       >
         <Icon
-          :name="justAdded ? 'lucide:check' : 'lucide:shopping-bag'"
+          :name="isCustomising ? 'lucide:x' : justAdded ? 'lucide:check' : 'lucide:shopping-bag'"
           class="card-add__icon"
           aria-hidden="true"
         />
-        <span>{{ justAdded ? props.text.menu.added : props.text.menu.add }}</span>
+        <span>{{ isCustomising ? props.text.menu.cancel : justAdded ? props.text.menu.added : props.text.menu.add }}</span>
       </button>
 
       <div :id="panelId" class="card-panel">

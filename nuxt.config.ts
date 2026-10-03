@@ -35,11 +35,11 @@ export default defineNuxtConfig({
     },
   },
   icon: {
-    // Provider is deliberately left at the default 'iconify'. Setting it to
-    // 'none' also disables the locally installed @iconify-json collections, which
-    // emptied the server bundle and left every icon rendering as a placeholder.
-    // The default resolves installed collections first and only reaches for the
-    // network for icons that are genuinely missing, so this stays offline.
+    // 'none' rendered every icon as an empty placeholder. 'server' is unusable
+    // here because Nitro strips the server bundle's JSON collection imports, so
+    // no collection resolves and no _nuxt_icon route is emitted. 'iconify'
+    // resolves from the client bundle, which carries all icons above.
+    provider: 'iconify',
     clientBundle: {
       scan: true,
       icons: [

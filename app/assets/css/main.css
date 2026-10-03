@@ -1311,12 +1311,13 @@ button {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: var(--radius-lg);
+  /* Same ground as the hero so the dish grid reads as one continuous surface. */
   background:
-    radial-gradient(130% 130% at 100% 0%, rgba(215, 25, 32, 0.3) 0%, rgba(215, 25, 32, 0) 62%),
-    linear-gradient(180deg, rgba(40, 25, 23, 0.97), rgba(21, 13, 12, 0.97));
-  box-shadow: 0 18px 40px rgba(26, 16, 14, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    radial-gradient(118% 92% at 86% 6%, rgba(245, 211, 58, 0.24), transparent 58%),
+    linear-gradient(140deg, #d71920 0%, #b3121a 54%, #8c0e15 100%);
+  box-shadow: 0 18px 40px rgba(112, 10, 16, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.14);
   transition:
     transform 0.34s var(--reveal-ease-expo),
     border-color 0.3s ease;
@@ -1330,14 +1331,14 @@ button {
   top: 0;
   z-index: 4;
   height: 2px;
-  background: linear-gradient(90deg, var(--kompreno-red), var(--kompreno-yellow));
+  background: linear-gradient(90deg, var(--kompreno-yellow), var(--kompreno-gold));
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.34s var(--reveal-ease-expo);
 }
 
 [dir='rtl'] .card::after {
-  background: linear-gradient(270deg, var(--kompreno-red), var(--kompreno-yellow));
+  background: linear-gradient(270deg, var(--kompreno-yellow), var(--kompreno-gold));
 }
 
 @media (hover: hover) {
@@ -1361,6 +1362,31 @@ button {
 
 .card:focus-within {
   border-color: rgba(245, 211, 58, 0.46);
+}
+
+/* The hero's drifting light also runs behind every card, softened and slowed so
+   a full grid reads as one slow shimmer rather than a dozen competing loops. The
+   horizontal etching is dropped here because it bands behind the card text. */
+.card .brand-motion {
+  --motion-line: rgba(245, 211, 58, 0.06);
+  --motion-shade: rgba(0, 0, 0, 0.08);
+  --motion-glint: rgba(255, 229, 112, 0.07);
+}
+
+.card .brand-motion__pattern {
+  animation-duration: 62s;
+}
+
+.card .brand-motion__etching {
+  display: none;
+}
+
+.card .brand-motion__sweep {
+  animation-duration: 30s;
+}
+
+.card .brand-motion__sweep--two {
+  animation-duration: 38s;
 }
 
 /* Artwork sits inside the card, so the grid keeps a clean baseline. */
@@ -1390,10 +1416,27 @@ button {
   transform: scale(1);
   transition:
     transform 0.6s var(--reveal-ease-expo),
-    scale 1.4s var(--reveal-ease-expo) 180ms;
+    scale 1.5s var(--reveal-ease-expo) 260ms;
 }
 
-/* Artwork curtain: oversized on arrival, settling once the card lands. */
+/* Artwork curtain, matching the hero frame: the media wipes open upward while
+   the oversized artwork settles behind it. Duration, delay and easing are read
+   from the custom properties the card's own v-reveal sets on the root, so the
+   featured and menu grids both stay in step without duplicating the config. */
+html.reveal-ready .card-media {
+  clip-path: inset(0 0 100% 0);
+  scale: 1.035;
+  transition:
+    clip-path var(--reveal-duration, 1000ms) var(--reveal-ease-mask) var(--reveal-delay, 0ms),
+    scale var(--reveal-duration, 1000ms) var(--reveal-ease-mask) var(--reveal-delay, 0ms);
+}
+
+.card.is-inview .card-media {
+  clip-path: inset(0 0 0 0);
+  scale: 1;
+}
+
+/* The artwork itself arrives oversized, then settles once the curtain lands. */
 html.reveal-ready .card-media img {
   scale: 1.16;
 }
@@ -1504,7 +1547,7 @@ html.reveal-ready .card-media img {
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.46);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .card-status {
@@ -1548,6 +1591,14 @@ html.reveal-ready .card-media img {
   font-weight: 800;
   cursor: pointer;
   transition: background 0.26s ease, border-color 0.26s ease, color 0.26s ease, transform 0.26s ease;
+}
+
+/* Open state turns the same button into a dismiss affordance. Declared before
+   the :hover rule so hover still wins on specificity ties. */
+.card.is-open .card-add {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.44);
+  color: var(--kompreno-white);
 }
 
 .card-add:hover:not(:disabled),
@@ -4422,6 +4473,13 @@ body:has(.cart-bar) .footer-top {
   html.reveal-ready .hero-frame img,
   html.reveal-ready .card-media img {
     scale: none !important;
+    transition: none !important;
+  }
+
+  html.reveal-ready .card-media,
+  .card.is-inview .card-media {
+    scale: none !important;
+    clip-path: none !important;
     transition: none !important;
   }
 
