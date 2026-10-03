@@ -404,6 +404,9 @@ const runViewport = async (viewport, { killObserver }) => {
   // measures perfectly while hiding the photograph behind it, which is exactly
   // what an opaque customiser panel did. Hit-test the middle of each image and
   // require the image itself to be what the reader's cursor would reach.
+  //
+  // `.card-overlay` legitimately sits on the artwork to carry the category
+  // badge and the index, so a hit there is by design and not an occlusion.
   const painted = await evaluate(sessionId, `(() => {
     const covered = []
 
@@ -412,10 +415,12 @@ const runViewport = async (viewport, { killObserver }) => {
       if (r.bottom <= 0 || r.top >= innerHeight) continue
 
       const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
-      const img = media.querySelector('img')
-      const ok = img && (hit === img || img.contains(hit) || media.contains(hit))
+      if (!hit) continue
 
-      if (!ok) covered.push({ hit: hit ? hit.className || hit.tagName : null })
+      const badge = media.parentElement.querySelector('.card-overlay')
+      const ok = media.contains(hit) || (badge && badge.contains(hit))
+
+      if (!ok) covered.push({ hit: hit.className || hit.tagName })
     }
 
     return covered
@@ -536,12 +541,22 @@ const runViewport = async (viewport, { killObserver }) => {
 
   // Escape must dismiss it and hand focus back to the card that opened it.
   await pressEscape(sessionId)
-  await sleep(500)
 
-  const dismissed = await evaluate(sessionId, `(() => ({
-    open: document.querySelectorAll('.customiser-panel').length,
-    focusOnTrigger: document.activeElement?.classList.contains('card-add'),
-  }))()`)
+  // Polled rather than slept: the dialog has to survive an enter transition
+  // before the key can land, and a fixed wait turns that race into a coin flip.
+  const dismissed = await evaluate(sessionId, `(async () => {
+    const started = performance.now()
+
+    while (document.querySelector('.customiser-panel') && performance.now() - started < 2000) {
+      await new Promise((r) => setTimeout(r, 50))
+    }
+
+    return {
+      open: document.querySelectorAll('.customiser-panel').length,
+      focusOnTrigger: document.activeElement?.classList.contains('card-add'),
+      ms: Math.round(performance.now() - started),
+    }
+  })()`)
 
   report('Escape closes the customiser', dismissed.open, (n) => n === 0)
   report('focus returns to the card button', dismissed.focusOnTrigger, (v) => v === true)
