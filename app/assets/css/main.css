@@ -1346,8 +1346,11 @@ button {
     border-color: rgba(245, 211, 58, 0.42);
   }
 
+  /* The hover zoom lives on `transform` while the entrance curtain owns
+     `scale`. Sharing one property meant .is-inview silently outranked the
+     hover rule, so the artwork only ever moved on scroll. */
   .card:hover .card-media img {
-    scale: 1.055;
+    transform: scale(1.055);
   }
 }
 
@@ -1384,8 +1387,9 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: scale(1);
   transition:
-    transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.6s var(--reveal-ease-expo),
     scale 1.4s var(--reveal-ease-expo) 180ms;
 }
 
@@ -1525,81 +1529,179 @@ html.reveal-ready .card-media img {
   background: var(--kompreno-muted);
 }
 
-.card-toggle {
+/* One tap opens the customiser, where quantity and notes are set before the
+   dish is committed to the basket. */
+.card-add {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  align-self: flex-start;
-  margin-top: 3px;
-  padding: 0;
-  border: 0;
-  background: none;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  margin-top: 4px;
+  padding: 12px 18px;
+  border: 1px solid rgba(245, 211, 58, 0.4);
+  border-radius: 999px;
+  background: rgba(245, 211, 58, 0.12);
   color: var(--kompreno-yellow);
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   font-weight: 800;
   cursor: pointer;
+  transition: background 0.26s ease, border-color 0.26s ease, color 0.26s ease, transform 0.26s ease;
 }
 
-.card-toggle:focus-visible {
+.card-add:hover:not(:disabled),
+.card-add:focus-visible:not(:disabled) {
+  background: var(--kompreno-yellow);
+  border-color: var(--kompreno-yellow);
+  color: var(--kompreno-charcoal);
+  transform: translateY(-1px);
+}
+
+.card-add:focus-visible {
   outline: 2px solid var(--kompreno-yellow);
   outline-offset: 3px;
-  border-radius: 5px;
 }
 
-.card-toggle__icon {
-  width: 15px;
-  height: 15px;
+.card-add:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.card-add__icon {
+  width: 17px;
+  height: 17px;
   flex: none;
-  transition: rotate 0.4s var(--reveal-ease-expo);
 }
 
-.card.is-open .card-toggle__icon {
-  rotate: 180deg;
-}
-
-/* grid-rows animates the disclosure without measuring anything. */
-.card-detail {
+/* grid-rows animates the panel without measuring anything. */
+.card-panel {
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows 0.44s var(--reveal-ease-expo);
 }
 
-.card.is-open .card-detail {
+.card.is-open .card-panel {
   grid-template-rows: 1fr;
 }
 
-.card-detail__inner {
+.card-panel__inner {
   min-height: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
 }
 
-.card-order {
+.card-panel__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-panel__label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.card-stepper {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  margin-top: 14px;
-  padding: 11px 18px;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.card-stepper__btn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--kompreno-white);
+  cursor: pointer;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.card-stepper__btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.card-stepper__btn:hover:not(:disabled) {
+  background: rgba(245, 211, 58, 0.24);
+  color: var(--kompreno-yellow);
+}
+
+.card-stepper__btn:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.card-stepper__value {
+  min-width: 22px;
+  text-align: center;
+  font-size: 0.94rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: var(--kompreno-white);
+}
+
+.card-notes {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--kompreno-white);
+  font: inherit;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  resize: vertical;
+  transition: border-color 0.24s ease, background 0.24s ease;
+}
+
+.card-notes::placeholder {
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.card-notes:hover {
+  border-color: rgba(255, 255, 255, 0.26);
+}
+
+.card-notes:focus {
+  outline: none;
+  border-color: rgba(245, 211, 58, 0.6);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.card-confirm {
+  margin-top: 3px;
+  padding: 12px 18px;
+  border: 0;
   border-radius: 999px;
   background: var(--kompreno-red);
   color: #fff;
+  font: inherit;
   font-size: 0.84rem;
   font-weight: 800;
-  text-decoration: none;
+  cursor: pointer;
   transition: background 0.24s ease, transform 0.24s ease, box-shadow 0.24s ease;
 }
 
-.card-order:hover,
-.card-order:focus-visible {
+.card-confirm:hover,
+.card-confirm:focus-visible {
   background: #ff6f5c;
   transform: translateY(-1px);
-  box-shadow: 0 14px 26px rgba(215, 25, 32, 0.28);
-}
-
-.card-order__icon {
-  width: 17px;
-  height: 17px;
-  flex: none;
+  box-shadow: 0 14px 26px rgba(215, 25, 32, 0.3);
 }
 
 .about-panel {
@@ -3494,15 +3596,17 @@ html.loader-reveal .page-shell {
 
   .card,
   .card-media img,
-  .card-toggle__icon,
-  .card-detail,
+  .card-panel,
   .card::after,
   .hero-frame img {
     transition-duration: 0.01ms;
   }
 
   .product-swap-enter-active,
-  .product-swap-leave-active {
+  .product-swap-leave-active,
+  .cart-bar,
+  .cart-lines,
+  .cart-bar__toggle-icon {
     transition-duration: 0.01ms;
   }
 }
@@ -3948,6 +4052,349 @@ html.reveal-ready .highlight-box.is-inview::after {
   width: 38px;
   height: 38px;
   flex: 0 0 38px;
+}
+
+/* --------------------------------------------------------------
+   Order bar - a fixed charcoal plate, on the footer material, that
+   only exists while the basket holds something. Checkout hands the
+   whole order to WhatsApp as one written message.
+   -------------------------------------------------------------- */
+
+.cart-bar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 70;
+  border-top: 1px solid rgba(245, 211, 58, 0.32);
+  background:
+    radial-gradient(120% 220% at 0% 100%, rgba(215, 25, 32, 0.32) 0%, rgba(215, 25, 32, 0) 58%),
+    linear-gradient(180deg, rgba(31, 19, 18, 0.97), rgba(16, 10, 9, 0.98));
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  backdrop-filter: blur(16px) saturate(130%);
+  box-shadow: 0 -18px 44px rgba(20, 11, 10, 0.34);
+  color: var(--kompreno-white);
+}
+
+.cart-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  width: min(var(--container), calc(100% - 32px));
+  margin-inline: auto;
+  padding-block: 14px;
+}
+
+.cart-bar__lead {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cart-bar__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid rgba(245, 211, 58, 0.45);
+  background: rgba(245, 211, 58, 0.12);
+  color: var(--kompreno-yellow);
+}
+
+.cart-bar__icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.cart-bar__meta {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cart-bar__title {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.cart-bar__count {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.56);
+}
+
+.cart-bar__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+
+.cart-bar__total {
+  display: grid;
+  gap: 1px;
+  text-align: end;
+}
+
+.cart-bar__total-label {
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.48);
+}
+
+.cart-bar__total-value {
+  font-size: 1.24rem;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--kompreno-yellow);
+}
+
+.cart-bar__toggle,
+.cart-bar__clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.86);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.22s ease, border-color 0.22s ease, color 0.22s ease;
+}
+
+.cart-bar__toggle:hover,
+.cart-bar__clear:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(245, 211, 58, 0.5);
+  color: var(--kompreno-yellow);
+}
+
+.cart-bar__toggle-icon {
+  width: 15px;
+  height: 15px;
+  transition: rotate 0.38s var(--reveal-ease-expo);
+}
+
+.cart-bar__toggle-icon.is-open {
+  rotate: 180deg;
+}
+
+.cart-bar__checkout {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--kompreno-yellow);
+  color: var(--kompreno-charcoal);
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.24s ease, transform 0.24s ease, box-shadow 0.24s ease;
+}
+
+.cart-bar__checkout svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.cart-bar__checkout:hover,
+.cart-bar__checkout:focus-visible {
+  background: #ffe066;
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px rgba(245, 211, 58, 0.3);
+}
+
+/* The written order, revealed on demand rather than always on screen. */
+.cart-lines {
+  display: grid;
+  grid-template-rows: 0fr;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  transition: grid-template-rows 0.44s var(--reveal-ease-expo);
+}
+
+.cart-lines.is-open {
+  grid-template-rows: 1fr;
+}
+
+.cart-lines__inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cart-lines__list {
+  display: grid;
+  gap: 10px;
+  width: min(var(--container), calc(100% - 32px));
+  margin-inline: auto;
+  padding-block: 16px 20px;
+  list-style: none;
+}
+
+.cart-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 6px 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cart-line:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.cart-line__name {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--kompreno-yellow);
+}
+
+.cart-line__note {
+  grid-column: 1;
+  font-size: 0.76rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.56);
+}
+
+.cart-line__qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.cart-line__qty button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--kompreno-white);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.cart-line__qty button:hover {
+  background: rgba(245, 211, 58, 0.24);
+  color: var(--kompreno-yellow);
+}
+
+.cart-line__qty svg {
+  width: 13px;
+  height: 13px;
+}
+
+.cart-line__qty bdi {
+  min-width: 20px;
+  text-align: center;
+  font-size: 0.86rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.cart-line__price {
+  font-size: 0.94rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cart-line__remove {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.cart-line__remove:hover {
+  background: rgba(215, 25, 32, 0.28);
+  border-color: rgba(215, 25, 32, 0.6);
+  color: #fff;
+}
+
+.cart-line__remove svg {
+  width: 14px;
+  height: 14px;
+}
+
+.cart-rise-enter-active,
+.cart-rise-leave-active {
+  transition: translate 0.42s var(--reveal-ease-expo), opacity 0.3s ease;
+}
+
+.cart-rise-enter-from,
+.cart-rise-leave-to {
+  translate: 0 100%;
+  opacity: 0;
+}
+
+/* The bar is fixed, so the page has to reserve the room it takes and the
+   back-to-top dial has to step over it. */
+body:has(.cart-bar) {
+  padding-bottom: 92px;
+}
+
+body:has(.cart-bar) .footer {
+  padding-bottom: 116px;
+}
+
+body:has(.cart-bar) .footer-top {
+  inset-block-end: 112px;
+}
+
+@media (max-width: 860px) {
+  .cart-bar__inner {
+    gap: 12px;
+  }
+
+  .cart-bar__lead {
+    flex: 1 1 100%;
+  }
+
+  .cart-bar__actions {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+
+  .cart-bar__checkout {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .cart-bar__total {
+    text-align: start;
+  }
+
+  body:has(.cart-bar) {
+    padding-bottom: 156px;
+  }
 }
 
 /* --------------------------------------------------------------

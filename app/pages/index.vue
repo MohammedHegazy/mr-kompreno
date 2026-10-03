@@ -118,6 +118,8 @@ useSeoMeta({
         :locale="locale"
         @switch-locale="switchLocale"
       />
+
+      <CartBar :text="currentText" :locale="locale" />
     </div>
   </div>
 </template>

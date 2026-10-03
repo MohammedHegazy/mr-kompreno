@@ -35,7 +35,11 @@ export default defineNuxtConfig({
     },
   },
   icon: {
-    provider: 'none',
+    // Provider is deliberately left at the default 'iconify'. Setting it to
+    // 'none' also disables the locally installed @iconify-json collections, which
+    // emptied the server bundle and left every icon rendering as a placeholder.
+    // The default resolves installed collections first and only reaches for the
+    // network for icons that are genuinely missing, so this stays offline.
     clientBundle: {
       scan: true,
       icons: [
@@ -46,6 +50,18 @@ export default defineNuxtConfig({
         'lucide:layout-grid',
         'lucide:flame',
         'lucide:pizza',
+        'lucide:utensils',
+        'lucide:menu',
+        'lucide:languages',
+        'lucide:message-circle',
+        'lucide:arrow-up',
+        'lucide:arrow-up-right',
+        'lucide:chevron-down',
+        'lucide:shopping-bag',
+        'lucide:check',
+        'lucide:plus',
+        'lucide:minus',
+        'lucide:x',
       ],
     },
   },
