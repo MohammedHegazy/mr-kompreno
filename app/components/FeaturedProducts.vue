@@ -10,41 +10,15 @@ const props = defineProps<{ items: MenuProduct[]; text: Record<string, any>; loc
       <SectionHead :eyebrow="props.text.menu.eyebrow" :title="props.text.menu.title" index="01" />
 
       <div class="featured-grid">
-        <article
+        <ProductCard
           v-for="(item, position) in props.items"
           :key="item.id"
-          class="card"
-          v-reveal="{
-            from: position % 2 === 0 ? 'start' : 'end',
-            distance: 76,
-            duration: 1150,
-            stagger: 130,
-          }"
-        >
-          <div
-            class="card-media"
-            v-reveal="{ from: 'curtain', duration: 1100, delay: 180, ease: 'mask' }"
-          >
-            <SkeletonImage :src="item.image" :alt="item.name[props.locale]" />
-          </div>
-
-          <div class="card-body">
-            <h3 v-reveal="{ from: 'up', distance: 16, duration: 800, delay: 160 }">
-              {{ item.name[props.locale] }}
-            </h3>
-
-            <p v-reveal="{ from: 'up', distance: 16, duration: 800, delay: 230 }">
-              {{ item.description[props.locale] }}
-            </p>
-
-            <div class="card-meta">
-              <span
-                class="price-tag"
-                v-reveal="{ from: 'scale', distance: 14, duration: 900, delay: 320, ease: 'snap' }"
-              >{{ props.text.menu.priceLabel }} {{ item.price }}</span>
-            </div>
-          </div>
-        </article>
+          v-reveal="{ from: 'up', distance: 64, duration: 1050, stagger: 150 }"
+          :item="item"
+          :text="props.text"
+          :locale="props.locale"
+          :index="position + 1"
+        />
       </div>
     </div>
   </section>

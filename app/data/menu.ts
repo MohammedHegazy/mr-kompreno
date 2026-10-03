@@ -182,6 +182,7 @@ export const textContent = {
       title: 'Signature favorites',
       priceLabel: 'USD',
       cta: 'View details',
+      order: 'Order on WhatsApp',
     },
     contact: {
       eyebrow: 'Visit & connect',

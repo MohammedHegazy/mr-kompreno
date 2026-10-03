@@ -43,7 +43,7 @@ let settled = false
 const queued = new Set<HTMLElement>()
 
 /** Elements whose decorative loops must not burn frames while off screen. */
-const LIVE_SELECTOR = '.card, .product-card, .brand-motion'
+const LIVE_SELECTOR = '.card, .brand-motion'
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 

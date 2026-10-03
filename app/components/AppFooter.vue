@@ -16,8 +16,7 @@ const emit = defineEmits<{ (e: 'switch-locale', value: Locale): void }>()
 
 const year = new Date().getFullYear()
 
-const scrollProgress = ref(0)
-const canScrollTop = ref(false)
+const { progress: scrollProgress, past: canScrollTop } = useScrollProgress(320)
 
 const sectionLinks = computed(() => navItems.map((item) => ({
   id: item.id,
@@ -38,14 +37,6 @@ const picks = computed(() => featuredProducts.map((product) => ({
 
 const ringOffset = computed(() => RING_LENGTH * (1 - scrollProgress.value))
 
-const updateScroll = () => {
-  const scrollTop = window.scrollY
-  const scrollable = document.documentElement.scrollHeight - window.innerHeight
-
-  canScrollTop.value = scrollTop > 320
-  scrollProgress.value = scrollable > 0 ? Math.min(1, Math.max(0, scrollTop / scrollable)) : 0
-}
-
 const scrollToTop = () => {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
@@ -54,17 +45,6 @@ const scrollToTop = () => {
 const switchLocale = () => {
   emit('switch-locale', props.locale === 'ar' ? 'en' : 'ar')
 }
-
-onMounted(() => {
-  updateScroll()
-  window.addEventListener('scroll', updateScroll, { passive: true })
-  window.addEventListener('resize', updateScroll)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', updateScroll)
-  window.removeEventListener('resize', updateScroll)
-})
 </script>
 
 <template>
@@ -229,8 +209,8 @@ onUnmounted(() => {
     </div>
 
     <div class="footer-echo" aria-hidden="true">
-      <span class="footer-echo__ghost" dir="ltr">KOMPRENO</span>
-      <span class="footer-echo__solid" dir="ltr">KOMPRENO</span>
+      <span class="footer-echo__ghost" dir="ltr">MR. KOMPRENO</span>
+      <span class="footer-echo__solid" dir="ltr">MR. KOMPRENO</span>
     </div>
 
     <div class="container footer-base">
@@ -255,28 +235,30 @@ onUnmounted(() => {
           <Icon name="lucide:languages" class="footer-lang__icon" aria-hidden="true" />
           <span aria-hidden="true">{{ props.locale === 'ar' ? 'EN' : 'العربية' }}</span>
         </button>
-
-        <button
-          class="footer-top"
-          type="button"
-          :class="{ 'is-visible': canScrollTop }"
-          :aria-label="props.text.footer.backToTop"
-          :tabindex="canScrollTop ? undefined : -1"
-          @click="scrollToTop"
-        >
-          <svg class="footer-top__ring" viewBox="0 0 44 44" aria-hidden="true">
-            <circle class="footer-top__track" cx="22" cy="22" :r="RING_RADIUS" />
-            <circle
-              class="footer-top__fill"
-              cx="22"
-              cy="22"
-              :r="RING_RADIUS"
-              :style="{ strokeDasharray: RING_LENGTH, strokeDashoffset: ringOffset }"
-            />
-          </svg>
-          <Icon name="lucide:arrow-up" class="footer-top__icon" aria-hidden="true" />
-        </button>
       </div>
     </div>
   </footer>
+
+  <Teleport to="body">
+    <button
+      class="footer-top"
+      type="button"
+      :class="{ 'is-visible': canScrollTop }"
+      :aria-label="props.text.footer.backToTop"
+      :tabindex="canScrollTop ? undefined : -1"
+      @click="scrollToTop"
+    >
+      <svg class="footer-top__ring" viewBox="0 0 44 44" aria-hidden="true">
+        <circle class="footer-top__track" cx="22" cy="22" :r="RING_RADIUS" />
+        <circle
+          class="footer-top__fill"
+          cx="22"
+          cy="22"
+          :r="RING_RADIUS"
+          :style="{ strokeDasharray: RING_LENGTH, strokeDashoffset: ringOffset }"
+        />
+      </svg>
+      <Icon name="lucide:arrow-up" class="footer-top__icon" aria-hidden="true" />
+    </button>
+  </Teleport>
 </template>

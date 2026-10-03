@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { menuCategories, navItems, products, featuredProducts, socialLinks, textContent } from '~/data/menu'
 import { useKompLocale } from '~/composables/useLocale'
+import { CHAPTER_ORDER, useActiveSection } from '~/composables/useActiveSection'
 
 const { locale, dir, switchLocale } = useKompLocale()
 const activeCategory = ref('all')
@@ -12,7 +13,11 @@ const heroTopics = menuCategories.filter((category) => category.id !== 'all')
 const heroSpotlight = products.find((product) => product.id === 'p05')!
 
 // Rail ticks follow the visual page order so their numbers match the section heads.
-const railOrder = ['home', 'about', 'menu', 'contact'] as const
+const railOrder = CHAPTER_ORDER
+
+// One observer feeds both the side rail and the header highlight, so the two
+// can never disagree about which chapter the visitor is reading.
+const { activeId, activeIndex, travel, visible } = useActiveSection(railOrder)
 
 const railItems = computed(() => railOrder
   .map((id) => navItems.find((item) => item.id === id))
@@ -46,13 +51,20 @@ useSeoMeta({
 
 <template>
   <div class="page-shell" :dir="dir">
-    <SectionProgressRail :items="railItems" />
+    <SectionProgressRail
+      :items="railItems"
+      :active-index="activeIndex"
+      :travel="travel"
+      :visible="visible"
+    />
 
     <div class="page-content">
       <AppHeader
-        :locale="locale"
-        :nav-items="navItems"
         :text="currentText"
+        :items="railItems"
+        :social-links="socialLinks"
+        :active-id="activeId"
+        :locale="locale"
         @switch-locale="switchLocale"
       />
 
@@ -82,33 +94,15 @@ useSeoMeta({
 
               <Transition name="product-swap" mode="out-in">
                 <div :key="activeCategory" class="product-grid">
-                  <article
-                    v-for="product in filteredProducts"
+                  <ProductCard
+                    v-for="(product, position) in filteredProducts"
                     :key="product.id"
-                    class="product-card"
                     v-reveal="{ from: 'up', distance: 40, duration: 1000, delay: 220, stagger: 80 }"
-                  >
-                    <div
-                      class="card-media"
-                      v-reveal="{ from: 'curtain', duration: 1000, delay: 200, ease: 'mask' }"
-                    >
-                      <SkeletonImage :src="product.image" :alt="product.name[locale]" />
-                    </div>
-                    <div class="card-body">
-                      <h3 v-reveal="{ from: 'up', distance: 16, duration: 800, delay: 180 }">
-                        {{ product.name[locale] }}
-                      </h3>
-                      <p v-reveal="{ from: 'up', distance: 16, duration: 800, delay: 240 }">
-                        {{ product.description[locale] }}
-                      </p>
-                      <div class="card-meta">
-                        <span
-                          class="price-tag"
-                          v-reveal="{ from: 'scale', distance: 14, duration: 900, delay: 320, ease: 'snap' }"
-                        >{{ currentText.menu.priceLabel }} {{ product.price }}</span>
-                      </div>
-                    </div>
-                  </article>
+                    :item="product"
+                    :text="currentText"
+                    :locale="locale"
+                    :index="position + 1"
+                  />
                 </div>
               </Transition>
             </div>
