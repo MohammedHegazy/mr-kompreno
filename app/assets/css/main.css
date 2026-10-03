@@ -524,13 +524,15 @@ button {
   box-shadow: 0 0 0 4px rgba(245, 211, 58, 0.2);
 }
 
+/* Held on one line: the size is tuned to the copy column width per locale
+   (see the [dir='rtl'] override below) rather than allowed to wrap. */
 .hero-copy h1 {
   margin: 0 0 18px;
-  max-width: 15ch;
-  font-size: clamp(2.5rem, 5.4vw, 4.25rem);
+  max-width: none;
+  white-space: nowrap;
+  font-size: clamp(1.9rem, 3.3vw, 2.65rem);
   line-height: 1.04;
   letter-spacing: -0.045em;
-  text-wrap: balance;
 }
 
 .hero-copy p {
@@ -1955,6 +1957,12 @@ button {
   text-align: right;
 }
 
+/* The Arabic hero title is a shorter string, so it carries more weight at the
+   same one-line fit. */
+[dir='rtl'] .hero-copy h1 {
+  font-size: clamp(2.5rem, 4.4vw, 3.35rem);
+}
+
 @media (max-width: 960px) {
 
   .hero-grid,
@@ -1971,6 +1979,14 @@ button {
 
   .hero-visual {
     margin-top: 12px;
+  }
+
+  [dir='rtl'] .hero-copy h1 {
+    font-size: clamp(1.35rem, calc(11vw - 8px), 3.35rem);
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(1.05rem, calc(8.2vw - 6px), 2.65rem);
   }
 
   .hero-frame {
@@ -2006,11 +2022,6 @@ button {
 
   .hero-copy {
     padding: 10px 4px;
-  }
-
-  .hero-copy h1 {
-    max-width: 100%;
-    font-size: clamp(2.05rem, 8.6vw, 2.6rem);
   }
 
   .hero-copy p {
