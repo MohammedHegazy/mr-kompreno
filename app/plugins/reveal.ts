@@ -32,9 +32,6 @@ const ARM_FALLBACK = 8000
  */
 const ELEMENT_BACKSTOP = 2600
 
-/** One rAF-throttled sweep covers everything the observer fails to report. */
-const SWEEP_INTERVAL = 120
-
 const DEFAULTS: Required<RevealOptions> = {
   from: 'up',
   distance: 32,
@@ -80,6 +77,23 @@ const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: r
 const onScreen = (element: HTMLElement) => {
   const rect = element.getBoundingClientRect()
   return rect.top < window.innerHeight && rect.bottom > 0
+}
+
+/**
+ * True when the reader has already gone past the element, or is looking at it.
+ *
+ * The bottom edge is deliberately not included. Content still below the fold has
+ * not been reached and keeps its animation until the reader arrives. The top
+ * edge is the one that matters: a fast flick, a scrollbar drag or a programmatic
+ * jump can move the viewport further than one element is tall between two
+ * frames, and an element only ever evaluated at the resting position then looks
+ * permanently off screen. It stays pending, the sweep skips it every time, and
+ * the photograph is never shown at all. Treating "above the fold" as reached
+ * costs nothing — the reader has already been past it — and closes that hole.
+ */
+const reached = (element: HTMLElement) => {
+  const rect = element.getBoundingClientRect()
+  return rect.bottom <= 0 || onScreen(element)
 }
 
 const show = (element: HTMLElement) => {
@@ -128,7 +142,7 @@ const sweep = () => {
   sweepFrame = 0
 
   for (const element of [...pending]) {
-    if (!onScreen(element)) continue
+    if (!reached(element)) continue
     open(element)
   }
 }

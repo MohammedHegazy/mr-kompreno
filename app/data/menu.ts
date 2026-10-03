@@ -7,12 +7,6 @@ export interface MenuProduct {
   description: Record<Locale, string>
   price: number
   image: string
-  /**
-   * Source artwork is taller than it is wide. The card crops to 3:4 for these
-   * instead of letterboxing them into the 3:2 box, which otherwise crops or
-   * shrinks the dish away from the frame.
-   */
-  portrait?: boolean
   featured?: boolean
   available?: boolean
 }
@@ -72,7 +66,6 @@ export const featuredProducts: MenuProduct[] = [
     description: { en: 'A balanced combo designed for sharing, filled with comfort-food favorites.', ar: 'باقة متوازنة مناسبة للمشاركة وتجمع بين أفضل المذاق المريح.' },
     price: 18,
     image: '/items/1615503114698.jpg',
-    portrait: true,
     featured: true,
     available: true,
   },
@@ -141,7 +134,6 @@ export const products: MenuProduct[] = [
     description: { en: 'A combo built for sharing with signature comfort-food flavors.', ar: 'باقة تجمع بين المذاقات المميزة وتجربة مشاركة أصلية.' },
     price: 18,
     image: '/items/1615503114698.jpg',
-    portrait: true,
     available: true,
   },
   {

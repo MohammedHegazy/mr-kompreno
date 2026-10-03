@@ -18,6 +18,7 @@ const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 
 const VIEWPORTS = [
   { name: 'mobile', width: 390, height: 844, dsf: 2 },
+  { name: 'tablet', width: 820, height: 1180, dsf: 2 },
   { name: 'desktop', width: 1920, height: 1080, dsf: 1 },
 ]
 
@@ -67,6 +68,21 @@ const evaluate = async (sessionId, expression) => {
 
   return result.result.value
 }
+
+/** A real key press through the input pipeline, not a synthetic page event. */
+const pressKey = async (sessionId, key, code) => {
+  for (const type of ['keyDown', 'keyUp']) {
+    await send('Input.dispatchKeyEvent', {
+      type,
+      key,
+      code,
+      windowsVirtualKeyCode: key === 'Escape' ? 27 : 0,
+      nativeVirtualKeyCode: key === 'Escape' ? 27 : 0,
+    }, sessionId)
+  }
+}
+
+const pressEscape = (sessionId) => pressKey(sessionId, 'Escape', 'Escape')
 
 const connect = async () => {
   for (let attempt = 0; attempt < 40; attempt += 1) {
@@ -211,15 +227,31 @@ const runViewport = async (viewport, { killObserver }) => {
   if (aboveFold.length) console.log(`        ${JSON.stringify(aboveFold.slice(0, 3))}`)
 
   // ---- 2. Scroll the whole page; every card must open ---------------------
-  await evaluate(sessionId, `(async () => {
+  // Stepped, like a reader, then polled. With IntersectionObserver disabled the
+  // scroll sweep is the only thing that can open a card, and it is batched into
+  // an animation frame, so a single fixed sleep races it. Polling measures what
+  // the reader actually gets; a card that never opens still fails.
+  const settle = await evaluate(sessionId, `(async () => {
+    const clipped = () => [...document.querySelectorAll('.card-media')]
+      .filter((m) => window.__komprenoClip(m)).length
+
     const step = innerHeight * 0.6
+    const started = performance.now()
+
     for (let y = 0; y < document.body.scrollHeight; y += step) {
       scrollTo(0, y)
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
     }
     scrollTo(0, document.body.scrollHeight)
-    await new Promise((r) => setTimeout(r, 900))
+
+    while (clipped() > 0 && performance.now() - started < 6000) {
+      await new Promise((r) => setTimeout(r, 100))
+    }
+
+    return { remaining: clipped(), ms: Math.round(performance.now() - started) }
   })()`)
+
+  console.log(`  INFO  every card opened in ${settle.ms}ms, ${settle.remaining} still clipped`)
 
   const cards = await evaluate(sessionId, `(() => {
     const all = [...document.querySelectorAll('.card')]
@@ -237,7 +269,27 @@ const runViewport = async (viewport, { killObserver }) => {
     }
   })()`)
 
+
   report('cards revealed after scroll', cards.inview, (n) => n === cards.total && n > 0)
+
+  if (cards.clipped.length) {
+    const stuck = await evaluate(sessionId, `[...document.querySelectorAll('.card')]
+      .filter((c) => window.__komprenoClip(c.querySelector('.card-media')))
+      .map((c) => {
+        const media = c.querySelector('.card-media')
+        const r = media.getBoundingClientRect()
+        return {
+          item: c.querySelector('.card-name').textContent.trim(),
+          rect: [Math.round(r.top), Math.round(r.bottom)],
+          inview: c.classList.contains('is-inview'),
+          stranded: media.hasAttribute('data-reveal-stranded'),
+          revealing: media.classList.contains('is-revealing'),
+          clip: window.__komprenoClip(media),
+        }
+      })`)
+    console.log(`        stuck: ${JSON.stringify(stuck)}`)
+  }
+
   report('cards still clipped', cards.clipped.length, (n) => n === 0)
   if (cards.clipped.length) console.log(`        ${JSON.stringify([...new Set(cards.clipped)].slice(0, 3))}`)
   report('cards with collapsed artwork', cards.zeroHeight, (n) => n === 0)
@@ -247,11 +299,11 @@ const runViewport = async (viewport, { killObserver }) => {
     const card = document.querySelector('.card')
     if (!card) return { error: 'no card' }
 
-    // The card's button opens the customiser; the confirm button commits.
+    // The card's button opens the customiser dialog; its confirm button commits.
     card.querySelector('.card-add').click()
     await new Promise((r) => setTimeout(r, 400))
 
-    const confirm = card.querySelector('.card-confirm')
+    const confirm = document.querySelector('.customiser-panel .card-confirm')
     if (!confirm) return { error: 'customiser did not open' }
 
     const before = document.body.classList.contains('has-cart')
@@ -319,7 +371,183 @@ const runViewport = async (viewport, { killObserver }) => {
   report('cards clipped after a category swap', swap.clipped, (v) => v === 0)
   if (swap.stranded) console.log(`        ${JSON.stringify(swap.detail)}`)
 
-  // ---- 5. Animated surfaces ------------------------------------------------
+  // ---- 5. Board uniformity: images and cards must all match ---------------
+  const board = await evaluate(sessionId, `(() => {
+    const cards = [...document.querySelectorAll('.card')]
+
+    const media = cards.map((c) => {
+      const m = c.querySelector('.card-media')
+      const r = m.getBoundingClientRect()
+      return { w: Math.round(r.width), h: Math.round(r.height) }
+    })
+
+    const bodies = cards.map((c) => Math.round(c.getBoundingClientRect().height))
+    const uniq = (values) => [...new Set(values)]
+
+    return {
+      cards: cards.length,
+      mediaSizes: uniq(media.map((m) => m.w + 'x' + m.h)),
+      mediaWidths: uniq(media.map((m) => m.w)),
+      mediaHeights: uniq(media.map((m) => m.h)),
+      cardHeights: uniq(bodies),
+      portraitClasses: document.querySelectorAll('.card-media.is-portrait').length,
+    }
+  })()`)
+
+  report('every card image is the same size', board.mediaSizes.length, (n) => n === 1)
+  report('card image widths match', board.mediaWidths.length, (n) => n === 1)
+  report('card image heights match', board.mediaHeights.length, (n) => n === 1)
+  report('every card is the same height', board.cardHeights.length, (n) => n === 1)
+  report('no per-asset image ratio in use', board.portraitClasses, (n) => n === 0)
+
+  // Geometry is not visibility. An overlay the same size as the frame still
+  // measures perfectly while hiding the photograph behind it, which is exactly
+  // what an opaque customiser panel did. Hit-test the middle of each image and
+  // require the image itself to be what the reader's cursor would reach.
+  const painted = await evaluate(sessionId, `(() => {
+    const covered = []
+
+    for (const media of document.querySelectorAll('.card-media')) {
+      const r = media.getBoundingClientRect()
+      if (r.bottom <= 0 || r.top >= innerHeight) continue
+
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+      const img = media.querySelector('img')
+      const ok = img && (hit === img || img.contains(hit) || media.contains(hit))
+
+      if (!ok) covered.push({ hit: hit ? hit.className || hit.tagName : null })
+    }
+
+    return covered
+  })()`)
+
+  report('every visible card image is actually painted', painted.length, (n) => n === 0)
+  if (painted.length) console.log(`        covered by: ${JSON.stringify(painted.slice(0, 3))}`)
+
+  console.log(`  INFO  ${board.cards} cards, images ${JSON.stringify(board.mediaSizes)}, card heights ${JSON.stringify(board.cardHeights)}`)
+
+  if (board.mediaSizes.length > 1 || board.cardHeights.length > 1) {
+    const grids = await evaluate(sessionId, `[...document.querySelectorAll('.featured-grid, .product-grid')].map((g) => ({
+      cls: g.className,
+      width: Math.round(g.getBoundingClientRect().width),
+      cards: g.querySelectorAll('.card').length,
+      columns: getComputedStyle(g).gridTemplateColumns,
+      parent: g.parentElement.className,
+      parentPad: getComputedStyle(g.parentElement).padding,
+    }))`)
+    console.log(`        grids: ${JSON.stringify(grids)}`)
+
+    const parts = await evaluate(sessionId, `[...document.querySelectorAll('.card')].map((c) => {
+      const body = c.querySelector('.card-body')
+      return {
+        grid: c.parentElement.className,
+        name: Math.round(c.querySelector('.card-name').getBoundingClientRect().height),
+        note: Math.round(c.querySelector('.card-note').getBoundingClientRect().height),
+        body: Math.round(body.getBoundingClientRect().height),
+      }
+    })`)
+    console.log(`        parts: ${JSON.stringify(parts.slice(0, 8))}`)
+  }
+
+  // The customiser is a dialog: it must not move a single card.
+  const beforeOpen = await evaluate(sessionId, `(async () => {
+    document.querySelectorAll('.card')[1].scrollIntoView({ block: 'center' })
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+    return [...document.querySelectorAll('.card')].map((c) => Math.round(c.getBoundingClientRect().height))
+  })()`)
+
+  await evaluate(sessionId, `document.querySelectorAll('.card')[1].querySelector('.card-add').click()`)
+  await sleep(500)
+
+  const dialog = await evaluate(sessionId, `(() => {
+    const panels = document.querySelectorAll('.customiser-panel')
+
+    if (panels.length !== 1) return { count: panels.length }
+
+    const panel = panels[0]
+    const r = panel.getBoundingClientRect()
+    const role = panel.getAttribute('role')
+    const modal = panel.getAttribute('aria-modal')
+
+    const focusInside = panel.contains(document.activeElement)
+
+    const label = document.getElementById(panel.getAttribute('aria-labelledby'))
+    const name = label?.textContent?.trim() ?? ''
+    const cardName = document.querySelectorAll('.card')[1].querySelector('.card-name').textContent.trim()
+
+    const thumb = panel.querySelector('.customiser-thumb')
+    const thumbBox = thumb?.getBoundingClientRect()
+
+    const close = panel.querySelector('.customiser-close')
+    const closeIcon = close?.querySelector('svg')
+    const closeColor = getComputedStyle(closeIcon).stroke
+    const closeInk = getComputedStyle(close).color
+    const closeDebug = { html: close?.innerHTML?.slice(0, 160) }
+
+    return {
+      count: panels.length,
+      role,
+      modal,
+      focusInside,
+      labelled: !!panel.getAttribute('aria-labelledby'),
+      name,
+      nameMatches: name === cardName,
+      closeColor,
+      closeInk,
+      closeDebug,
+      thumbWidth: Math.round(thumbBox?.width ?? 0),
+      thumbHeight: Math.round(thumbBox?.height ?? 0),
+      thumbFits: (thumbBox?.width ?? 0) <= 80 && (thumbBox?.height ?? 0) <= 60 && (thumbBox?.width ?? 0) > 0,
+      onScreen: r.top >= 0 && r.bottom <= innerHeight,
+      quantity: panel.querySelector('.card-stepper__value')?.textContent?.trim(),
+      hasNotes: !!panel.querySelector('textarea'),
+      hasConfirm: !!panel.querySelector('.card-confirm'),
+    }
+  })()`)
+
+  report('exactly one customiser dialog exists', dialog.count, (n) => n === 1)
+  report('the customiser is a modal dialog', dialog.role, (v) => v === 'dialog')
+  report('the customiser declares aria-modal', dialog.modal, (v) => v === 'true')
+  report('the customiser is labelled by its title', dialog.labelled, (v) => v === true)
+  // Labelled by the dish alone. Pointing aria-labelledby at the panel itself
+  // makes the accessible name every word in the dialog, labels included.
+  report('the customiser is named after the dish only', dialog.nameMatches, (v) => v === true)
+  report('the customiser takes focus', dialog.focusInside, (v) => v === true)
+  report('the customiser fits the viewport', dialog.onScreen, (v) => v === true)
+  report('the customiser thumbnail is not stretched', dialog.thumbFits, (v) => v === true)
+  report('the close icon is the brand yellow', dialog.closeColor, (v) => v === 'rgb(245, 211, 58)')
+  console.log(`        close debug: ${JSON.stringify({ ink: dialog.closeInk, stroke: dialog.closeColor, html: dialog.closeDebug })}`)
+  report('the customiser opens with quantity 1', dialog.quantity, (v) => v === '1')
+  report('the customiser has a notes field', dialog.hasNotes, (v) => v === true)
+  report('the customiser has a confirm button', dialog.hasConfirm, (v) => v === true)
+  console.log(`        accessible name: ${JSON.stringify(dialog.name)}, thumb ${dialog.thumbWidth}x${dialog.thumbHeight}`)
+
+  // No stray panel left behind in the card markup.
+  const strays = await evaluate(sessionId, `document.querySelectorAll('.card .card-panel, .card-panel').length`)
+  report('no panel left inside any card', strays, (n) => n === 0)
+
+  // Escape must dismiss it and hand focus back to the card that opened it.
+  await pressEscape(sessionId)
+  await sleep(500)
+
+  const dismissed = await evaluate(sessionId, `(() => ({
+    open: document.querySelectorAll('.customiser-panel').length,
+    focusOnTrigger: document.activeElement?.classList.contains('card-add'),
+  }))()`)
+
+  report('Escape closes the customiser', dismissed.open, (n) => n === 0)
+  report('focus returns to the card button', dismissed.focusOnTrigger, (v) => v === true)
+
+  const afterOpen = await evaluate(sessionId, `[...document.querySelectorAll('.card')].map((c) => Math.round(c.getBoundingClientRect().height))`)
+
+  const resized = beforeOpen
+    .map((height, index) => ({ index, before: height, after: afterOpen[index] }))
+    .filter((entry) => entry.before !== entry.after)
+
+  report('opening the customiser moves no card', resized.length, (n) => n === 0)
+  if (resized.length) console.log(`        ${JSON.stringify(resized.slice(0, 4))}`)
+
+  // ---- 6. Animated surfaces ------------------------------------------------
   const motion = await evaluate(sessionId, `(() => ({
     layers: document.querySelectorAll('.brand-motion').length,
     animated: document.getAnimations().filter((a) => a.playState === 'running').length,
@@ -327,7 +555,7 @@ const runViewport = async (viewport, { killObserver }) => {
 
   console.log(`  INFO  motion layers: ${motion.layers}, running animations: ${motion.animated}`)
 
-  // ---- 6. Mega menu is driven by state, not by :hover alone -----------------
+  // ---- 7. Mega menu is driven by state, not by :hover alone -----------------
   if (viewport.name === 'desktop') {
     const menu = await evaluate(sessionId, `(async () => {
       const trigger = [...document.querySelectorAll('.nav-link')]

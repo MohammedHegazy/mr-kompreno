@@ -131,6 +131,7 @@ useHead({
       />
 
       <CartBar :text="currentText" :locale="locale" />
+      <CustomiseDialog :text="currentText" :locale="locale" />
     </div>
   </div>
 </template>

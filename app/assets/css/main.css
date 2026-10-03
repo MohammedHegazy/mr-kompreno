@@ -1309,15 +1309,18 @@ button {
 
 /* Both menu grids are the same honest three-up board.
 
-   align-items: start matters. The default stretch ties every card in a row to
-   the tallest one, so opening the customiser on a single card grew the whole
-   grid row — and with it the two sibling cards the reader never touched, on
-   every frame of the transition. */
+   Cards stretch to the tallest in their row on purpose. `align-items: start`
+   was here to stop one card's customiser from growing its two untouched
+   siblings, but it also let the row go ragged: a two-line dish name or a longer
+   price made that card shorter than the rest, and a board of mismatched plates
+   reads as broken rather than as varied. Nothing inside a card can grow it any
+   more: the customiser is a separate dialog, and the name and note are locked
+   to the same number of lines. */
 .featured-grid,
 .product-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: start;
+  align-items: stretch;
   column-gap: 24px;
   row-gap: 32px;
 }
@@ -1358,7 +1361,7 @@ button {
   box-shadow: 0 18px 40px rgba(112, 10, 16, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.14);
   transition:
     transform 0.34s var(--reveal-ease-expo),
-    border-color 0.3s ease;
+    border-color 0.3s ease !important;
 }
 
 /* A single ember rule along the top edge is the whole hover signal. */
@@ -1402,19 +1405,19 @@ button {
   border-color: rgba(245, 211, 58, 0.46);
 }
 
-/* Artwork sits inside the card, so the grid keeps a clean baseline. */
+/* One frame for every dish.
+
+   The sources are not all the same shape — one is 840x1200 and another is
+   1200x816 — so `object-fit: cover` crops them into a single 4:3 window. A
+   per-asset ratio was tried and reverted: it made one card in the grid taller
+   than its neighbours, which is exactly the ragged edge this board is supposed
+   not to have. Uniform frame, uniform card. */
 .card-media {
   position: relative;
   z-index: 2;
   aspect-ratio: 4 / 3;
   overflow: hidden;
   background: var(--kompreno-canvas);
-}
-
-/* Portrait assets get a taller frame so a 3:4 photograph is not cropped down
-   to a letterbox inside the 4:3 slot every dish uses. */
-.card-media.is-portrait {
-  aspect-ratio: 3 / 4;
 }
 
 .card-media::after {
@@ -1545,6 +1548,17 @@ html.reveal-ready .card-media img {
   line-height: 1.3;
   letter-spacing: -0.02em;
   color: var(--kompreno-yellow);
+
+  /* Fixed two-line box. Names vary from one to two lines, and a card whose
+     text is shorter than its neighbour's ends up shorter overall. Locking the
+     box to exactly two lines makes every card body the same height, which is
+     what makes the whole board uniform. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 3.224rem;
+  max-height: 3.224rem;
 }
 
 .card-note {
@@ -1552,6 +1566,14 @@ html.reveal-ready .card-media img {
   font-size: 0.9rem;
   line-height: 1.72;
   color: rgba(255, 255, 255, 0.66);
+
+  /* Same two-line lock as the name. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 3.096rem;
+  max-height: 3.096rem;
 }
 
 .card-meta {
@@ -1630,14 +1652,6 @@ html.reveal-ready .card-media img {
   transition: background 0.26s ease, border-color 0.26s ease, color 0.26s ease, transform 0.26s ease;
 }
 
-/* Open state turns the same button into a dismiss affordance. Declared before
-   the :hover rule so hover still wins on specificity ties. */
-.card.is-open .card-add {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.44);
-  color: var(--kompreno-white);
-}
-
 .card-add:hover:not(:disabled),
 .card-add:focus-visible:not(:disabled) {
   background: var(--kompreno-yellow);
@@ -1662,38 +1676,130 @@ html.reveal-ready .card-media img {
   flex: none;
 }
 
-/* grid-rows animates the panel without measuring anything. */
-.card-panel {
+/* The customiser is a shared dialog, not a panel inside the card.
+
+   As an in-card panel it failed three ways in a row: in flow it grew the card
+   and stretched its whole row, anchored to the card it covered the button that
+   closes it, and stretched to the artwork frame its background painted over the
+   photograph whether or not it was open. A card is now only an image, a name, a
+   note, a price and a button, so its geometry is constant by construction. */
+
+.customiser-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
   display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.44s var(--reveal-ease-expo);
+  place-items: center;
+  padding: 24px;
+  background: rgba(14, 9, 8, 0.62);
 }
 
-.card.is-open .card-panel {
-  grid-template-rows: 1fr;
-}
-
-.card-panel__inner {
-  min-height: 0;
-  overflow: hidden;
+.customiser-panel {
+  width: min(100%, 440px);
+  max-height: 100%;
+  overflow: auto;
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 14px;
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(245, 211, 58, 0.24);
+  background: linear-gradient(180deg, #241715, #150e0d);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
 }
 
-.card-panel__row {
+.customiser-panel:focus-visible {
+  outline: 2px solid var(--kompreno-yellow);
+  outline-offset: 3px;
+}
+
+.customiser-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Two classes, not one: `.skeleton-image` is declared later in this file and
+   would otherwise win on source order and stretch the thumbnail to the full
+   width of the dialog. */
+.customiser-top .customiser-thumb {
+  flex: none;
+  width: 80px;
+  height: 60px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.customiser-top .customiser-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.customiser-title {
+  flex: 1;
+  margin: 0;
+  font-size: 1.16rem;
+  line-height: 1.35;
+  color: var(--kompreno-yellow);
+}
+
+.customiser-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--kompreno-yellow);
+  cursor: pointer;
+}
+
+.customiser-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.customiser-close svg {
+  width: 17px;
+  height: 17px;
+}
+
+.customiser-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-.card-panel__label {
+.customiser-label {
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.5);
+}
+
+.customiser-enter-active,
+.customiser-leave-active {
+  transition: opacity 0.24s ease;
+}
+
+.customiser-enter-active .customiser-panel,
+.customiser-leave-active .customiser-panel {
+  transition: translate 0.24s var(--reveal-ease-expo);
+}
+
+.customiser-enter-from,
+.customiser-leave-to {
+  opacity: 0;
+}
+
+.customiser-enter-from .customiser-panel,
+.customiser-leave-to .customiser-panel {
+  translate: 0 14px;
 }
 
 .card-stepper {
@@ -1830,7 +1936,14 @@ html.reveal-ready .card-media img {
   background: rgba(255, 255, 255, 0.34);
   border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.62);
-  padding: 22px;
+
+  /* No inline padding and no inline border. The shell used to inset its grid by
+     22px of padding plus 1px of border on each side, which made every card in
+     the menu 46px narrower than the featured cards directly above them — two
+     different card widths on one page. The plate now spans the container
+     exactly, so both grids produce the same card width. */
+  padding: 22px 0;
+  border-inline: 0;
 }
 
 .category-row {
@@ -3702,7 +3815,7 @@ html.loader-reveal .page-shell {
 
   .card,
   .card-media img,
-  .card-panel,
+  .customiser-panel,
   .card::after,
   .hero-frame img {
     transition-duration: 0.01ms;
